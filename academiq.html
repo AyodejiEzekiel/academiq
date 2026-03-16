@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AcademiQ — Academic Journal Discovery</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f4f0; color: #1a1a18; min-height: 100vh; }
+
+/* TOPBAR */
+.topbar { background: #fff; border-bottom: 0.5px solid rgba(0,0,0,0.12); padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 54px; position: sticky; top: 0; z-index: 10; }
+.logo { font-size: 19px; font-weight: 500; color: #1a1a18; display: flex; align-items: center; gap: 8px; cursor:pointer; }
+.logo-dot { width: 9px; height: 9px; border-radius: 50%; background: #1D9E75; }
+.nav { display: flex; gap: 4px; }
+.nav-btn { font-size: 13px; padding: 6px 14px; border-radius: 8px; border: none; background: transparent; color: #666; cursor: pointer; transition: background .15s; }
+.nav-btn.active, .nav-btn:hover { background: #f0ede8; color: #1a1a18; }
+.nav-btn.active { font-weight: 500; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.btn-donate { background: #f5a623; color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
+.btn-donate:hover { opacity: .85; }
+.btn-login { background: transparent; border: 0.5px solid rgba(0,0,0,0.2); border-radius: 8px; padding: 7px 14px; font-size: 13px; color: #1a1a18; cursor: pointer; transition: background .15s; white-space: nowrap; }
+.btn-login:hover { background: #f0ede8; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: #E1F5EE; color: #0F6E56; font-size: 13px; font-weight: 500; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 0.5px solid #9FE1CB; flex-shrink: 0; }
+.user-menu { position: relative; }
+.user-dropdown { display: none; position: absolute; right: 0; top: 42px; background: #fff; border: 0.5px solid rgba(0,0,0,0.12); border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); min-width: 200px; z-index: 100; padding: 6px; }
+.user-dropdown.open { display: block; }
+.user-dropdown a { display: block; padding: 8px 12px; font-size: 13px; color: #1a1a18; text-decoration: none; border-radius: 6px; cursor: pointer; }
+.user-dropdown a:hover { background: #f0ede8; }
+.user-info-row { padding: 10px 12px 8px; border-bottom: 0.5px solid rgba(0,0,0,0.08); margin-bottom: 4px; }
+.user-info-name { font-size: 13px; font-weight: 500; }
+.user-info-email { font-size: 11px; color: #888; margin-top: 2px; }
+
+/* MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 16px; padding: 28px; width: 100%; max-width: 440px; margin: 16px; position: relative; max-height: 92vh; overflow-y: auto; }
+.modal h2 { font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+.modal .subtitle { font-size: 13px; color: #888; margin-bottom: 20px; line-height: 1.5; }
+.modal-close { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 22px; color: #aaa; cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 4px; }
+.modal-close:hover { background: #f0ede8; color: #444; }
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 12px; font-weight: 500; color: #555; margin-bottom: 5px; }
+.form-group input, .form-group select { width: 100%; padding: 10px 12px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.18); font-size: 14px; color: #1a1a18; background: #f5f4f0; outline: none; font-family: inherit; }
+.form-group input:focus, .form-group select:focus { border-color: #1D9E75; background: #fff; }
+.form-error { font-size: 12px; color: #c0392b; margin-top: 5px; display: none; }
+.form-error.show { display: block; }
+.form-success { font-size: 12px; color: #0F6E56; margin-top: 5px; display: none; background: #E1F5EE; padding: 8px 10px; border-radius: 6px; }
+.form-success.show { display: block; }
+.btn-full { width: 100%; padding: 11px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: opacity .15s; }
+.btn-full:hover { opacity: .88; }
+.modal-switch { font-size: 13px; color: #888; text-align: center; margin-top: 16px; }
+.modal-switch a { color: #1D9E75; cursor: pointer; text-decoration: none; font-weight: 500; }
+.divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; color: #ccc; font-size: 12px; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 0.5px; background: rgba(0,0,0,0.1); }
+.google-btn { width: 100%; padding: 11px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.15); background: #f5f4f0; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; transition: background .15s; }
+.google-btn:hover { background: #eae8e3; }
+
+/* DONATION */
+.donation-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.amt-btn { padding: 10px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.15); background: #f5f4f0; font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; text-align: center; }
+.amt-btn:hover { border-color: #1D9E75; background: #E1F5EE; color: #0F6E56; }
+.amt-btn.selected { border-color: #1D9E75; background: #E1F5EE; color: #0F6E56; }
+.custom-amt-input { width: 100%; padding: 10px 12px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.18); font-size: 14px; color: #1a1a18; background: #f5f4f0; outline: none; font-family: inherit; margin-bottom: 14px; }
+.custom-amt-input:focus { border-color: #1D9E75; background: #fff; }
+.donation-impact { background: #E1F5EE; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px; color: #0F6E56; line-height: 1.5; }
+.payment-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.payment-opt { padding: 10px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.15); background: #f5f4f0; font-size: 13px; cursor: pointer; text-align: center; transition: all .15s; }
+.payment-opt:hover, .payment-opt.selected { border-color: #1D9E75; background: #E1F5EE; color: #0F6E56; font-weight: 500; }
+.thank-you { text-align: center; padding: 8px 0; }
+.thank-you .big { font-size: 48px; margin-bottom: 14px; }
+.thank-you h3 { font-size: 18px; font-weight: 500; margin-bottom: 10px; }
+.thank-you p { font-size: 13px; color: #666; line-height: 1.7; }
+
+/* CONTENT */
+.content { padding: 24px; max-width: 860px; margin: 0 auto; }
+.hero { background: #fff; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.1); padding: 28px 24px; margin-bottom: 16px; }
+.hero h2 { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
+.hero p { font-size: 14px; color: #666; margin-bottom: 18px; line-height: 1.6; }
+.search-row { display: flex; gap: 8px; }
+.search-row input { flex: 1; font-size: 14px; padding: 10px 14px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.2); background: #f5f4f0; color: #1a1a18; outline: none; }
+.search-row input:focus { border-color: #1D9E75; background: #fff; }
+.btn-primary { background: #1D9E75; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: opacity .15s; }
+.btn-primary:hover { opacity: .85; }
+.btn-sm { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 0.5px solid rgba(0,0,0,0.15); background: #fff; color: #555; cursor: pointer; transition: background .15s; }
+.btn-sm:hover { background: #f0ede8; color: #1a1a18; }
+.btn-sm.active { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; font-weight: 500; }
+.filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.stats-row { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 16px; }
+.stat-card { background: #fff; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.08); padding: 14px 16px; }
+.stat-card .num { font-size: 24px; font-weight: 500; color: #1a1a18; }
+.stat-card .lbl { font-size: 12px; color: #888; margin-top: 2px; }
+.journal-list { display: flex; flex-direction: column; gap: 10px; }
+.journal-card { background: #fff; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.1); padding: 16px 18px; transition: border-color .15s, box-shadow .15s; }
+.journal-card:hover { border-color: rgba(0,0,0,0.2); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.jcard-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.jtitle { font-size: 15px; font-weight: 500; color: #1a1a18; line-height: 1.4; }
+.jmeta { font-size: 12px; color: #888; margin-top: 2px; }
+.badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
+.badge { font-size: 11px; padding: 3px 9px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+.badge-free { background: #E1F5EE; color: #0F6E56; }
+.badge-paid { background: #FAEEDA; color: #633806; }
+.badge-doaj { background: #E6F1FB; color: #0C447C; }
+.badge-scopus { background: #EEEDFE; color: #3C3489; }
+.badge-africa { background: #EAF3DE; color: #3B6D11; }
+.badge-intl { background: #f0ede8; color: #444; }
+.badge-local { background: #EEEDFE; color: #3C3489; }
+.badge-national { background: #E6F1FB; color: #0C447C; }
+.badge-regional { background: #EAF3DE; color: #3B6D11; }
+.country-selector { display:flex; align-items:center; gap:8px; background:#fff; border-radius:10px; border:0.5px solid rgba(0,0,0,0.1); padding:10px 16px; margin-bottom:14px; font-size:13px; flex-wrap:wrap; }
+.country-selector label { color:#888; white-space:nowrap; }
+.country-selector select { border:0.5px solid rgba(0,0,0,0.15); border-radius:6px; padding:5px 10px; font-size:13px; background:#f5f4f0; color:#1a1a18; outline:none; cursor:pointer; font-family:inherit; }
+.country-selector select:focus { border-color:#1D9E75; background:#fff; }
+.scope-badge-row { display:flex; gap:5px; flex-wrap:wrap; margin-bottom:6px; }
+.badge-warn { background: #FCEBEB; color: #791F1F; }
+.badge-saved { background: #FAEEDA; color: #633806; }
+.jcard-bottom { display: flex; align-items: center; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.jstat { font-size: 12px; color: #888; display: flex; align-items: center; gap: 4px; }
+.cred-bar { height: 4px; width: 50px; background: #e8e6e0; border-radius: 2px; overflow: hidden; display:inline-block; vertical-align:middle; }
+.apc-stat { background: transparent; border-radius: 6px; font-size: 12px !important; }
+.cred-fill { height: 100%; border-radius: 2px; }
+.jcard-actions { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid rgba(0,0,0,0.06); flex-wrap: wrap; }
+.jbtn { font-size: 12px; padding: 5px 12px; border-radius: 6px; border: 0.5px solid rgba(0,0,0,0.15); background: #f5f4f0; color: #444; cursor: pointer; transition: all .15s; }
+.jbtn:hover { background: #e8e6e0; }
+.jbtn.save-btn.saved { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; }
+.jbtn.submit-btn { background: #1D9E75; color: #fff; border-color: #1D9E75; }
+.jbtn.submit-btn:hover { opacity: .85; }
+
+.match-score { font-size: 13px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+.score-high { background: #E1F5EE; color: #0F6E56; }
+.score-mid { background: #FAEEDA; color: #633806; }
+.ai-panel { background: #fff; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.1); padding: 20px 22px; margin-bottom: 16px; }
+.ai-panel h3 { font-size: 15px; font-weight: 500; margin-bottom: 8px; }
+.ai-panel p { font-size: 13px; color: #666; margin-bottom: 12px; line-height: 1.6; }
+.ai-panel textarea { width: 100%; font-size: 13px; padding: 10px 12px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.15); background: #f5f4f0; color: #1a1a18; resize: vertical; font-family: inherit; line-height: 1.6; outline: none; }
+.ai-panel textarea:focus { border-color: #1D9E75; background: #fff; }
+.ai-tag { display: inline-flex; align-items: center; gap: 4px; background: #E1F5EE; color: #0F6E56; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.section-title { font-size: 11px; font-weight: 500; color: #999; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .06em; }
+.empty { text-align: center; padding: 48px 20px; color: #999; font-size: 14px; }
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #e0e0dc; border-top-color: #1D9E75; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.alert-card { background: #fff; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.1); padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px; transition: box-shadow .15s; }
+.alert-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.alert-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.alert-dot.cfp { background: #1D9E75; }
+.alert-dot.new { background: #185FA5; }
+.alert-title { font-size: 14px; font-weight: 500; line-height: 1.4; }
+.alert-meta { font-size: 12px; color: #888; margin-top: 3px; }
+.alert-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+.tab-content { display: none; }
+.tab-content.visible { display: block; }
+.scope-text { font-size: 12px; color: #666; margin-bottom: 8px; line-height: 1.5; }
+
+/* FIELD TAGS */
+.field-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.field-tag { font-size: 12px; padding: 4px 12px; border-radius: 20px; border: 0.5px solid rgba(0,0,0,0.15); background: #fff; color: #555; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all .15s; }
+.field-tag.active { background: #E1F5EE; color: #0F6E56; border-color: #9FE1CB; font-weight: 500; }
+.field-tag .remove { font-size: 14px; line-height: 1; opacity: .6; }
+.field-tag .remove:hover { opacity: 1; }
+.add-field-form { display: none; gap: 8px; margin-top: 8px; }
+.add-field-form.open { display: flex; }
+.add-field-form input { flex: 1; padding: 7px 10px; border-radius: 8px; border: 0.5px solid rgba(0,0,0,0.18); font-size: 13px; background: #f5f4f0; outline: none; font-family: inherit; }
+.add-field-form input:focus { border-color: #1D9E75; background: #fff; }
+
+/* PROFILE MODAL */
+.profile-field { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); }
+.profile-field:last-child { border-bottom: none; }
+.profile-label { font-size: 12px; color: #888; }
+.profile-val { font-size: 13px; font-weight: 500; color: #1a1a18; }
+.profile-edit { font-size: 12px; color: #1D9E75; cursor: pointer; }
+
+/* SAVED JOURNALS */
+.saved-empty { text-align: center; padding: 32px 16px; color: #aaa; font-size: 13px; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a1a18; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999; transition: transform .3s ease; pointer-events: none; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* SUPPORT BANNER */
+.support-banner { background: #fff; border-top: 0.5px solid rgba(0,0,0,0.1); padding: 20px 24px; text-align: center; margin-top: 32px; }
+.support-banner p { font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.6; }
+
+/* JOURNAL DETAIL MODAL */
+.detail-section { margin-bottom: 16px; }
+.detail-section h4 { font-size: 12px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+.detail-section p { font-size: 14px; color: #1a1a18; line-height: 1.6; }
+.detail-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid rgba(0,0,0,0.07); font-size: 13px; }
+.detail-row:last-child { border-bottom: none; }
+.detail-row .dk { color: #888; }
+.detail-row .dv { font-weight: 500; color: #1a1a18; }
+
+@media (max-width: 620px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .topbar { padding: 0 12px; gap: 6px; }
+  .content { padding: 14px; }
+  .nav-btn { padding: 6px 8px; font-size: 12px; }
+  .jcard-top { flex-direction: column; gap: 8px; }
+  .nav-label { display: none; }
+}
+
+/* PAGINATOR */
+.paginator { display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:20px 0 8px; justify-content:center; }
+.page-btn { padding:6px 12px; border-radius:8px; border:0.5px solid rgba(0,0,0,0.15); background:#fff; font-size:13px; cursor:pointer; transition:all .15s; min-width:36px; }
+.page-btn:hover:not(:disabled) { background:#E1F5EE; color:#0F6E56; border-color:#9FE1CB; }
+.page-btn.active { background:#1D9E75; color:#fff; border-color:#1D9E75; font-weight:500; }
+.page-btn:disabled { opacity:.4; cursor:default; }
+.page-ellipsis { color:#aaa; padding:0 4px; font-size:13px; }
+.page-info { font-size:12px; color:#999; margin-left:8px; }
+</style>
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo" onclick="switchTab('discover', document.querySelector('.nav-btn'))">
+    <span class="logo-dot"></span>AcademiQ
+  </div>
+  <div class="nav">
+    <button class="nav-btn active" onclick="switchTab('discover',this)">Discover</button>
+    <button class="nav-btn" onclick="switchTab('match',this)">AI Match</button>
+    <button class="nav-btn" onclick="switchTab('alerts',this)">Alerts</button>
+    <button class="nav-btn" onclick="switchTab('grants',this)">Grants</button>
+    <button class="nav-btn" onclick="switchTab('saved',this)">Saved</button>
+  </div>
+  <div class="topbar-right">
+    <button class="btn-donate" onclick="openDonate()">&#9829; Support us</button>
+    <div id="auth-buttons">
+      <button class="btn-login" onclick="openLogin()">Sign in / Register</button>
+    </div>
+    <div id="user-menu-wrap" class="user-menu" style="display:none">
+      <div class="avatar" id="user-avatar" onclick="toggleDropdown()">--</div>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="user-info-row">
+          <div class="user-info-name" id="dd-name"></div>
+          <div class="user-info-email" id="dd-email"></div>
+        </div>
+        <a onclick="openSavedFromMenu()">&#9733; Saved journals (<span id="saved-count">0</span>)</a>
+        <a onclick="openAlertSettings()">&#128276; Alert settings</a>
+        <a onclick="openProfile()">&#128100; My profile</a>
+        <div style="height:0.5px;background:rgba(0,0,0,0.08);margin:4px 0"></div>
+        <a onclick="logout()" style="color:#c0392b">Sign out</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- DISCOVER TAB -->
+  <div id="tab-discover" class="tab-content visible">
+    <div class="hero">
+      <h2>Find journals for your research</h2>
+      <p>Search 20,000+ curated journals — filter by APC, discipline, region, and indexing. Free for African academics.</p>
+      <div class="search-row">
+        <input type="text" id="search-input" placeholder="Search by journal name, field, keyword, or country..." oninput="debounceFilter()" />
+        <button class="btn-primary" onclick="filterJournals()">Search</button>
+      </div>
+    </div>
+    <div id="country-selector-wrap" class="country-selector">
+      <label>&#127757; Your country:</label>
+      <select id="user-country-select" onchange="setUserCountry(this.value)">
+        <option value="">-- Select your country --</option>
+        <option value="Nigeria">Nigeria</option>
+        <option value="Ghana">Ghana</option>
+        <option value="Kenya">Kenya</option>
+        <option value="South Africa">South Africa</option>
+        <option value="Ethiopia">Ethiopia</option>
+        <option value="Tanzania">Tanzania</option>
+        <option value="Uganda">Uganda</option>
+        <option value="Rwanda">Rwanda</option>
+        <option value="Cameroon">Cameroon</option>
+        <option value="Senegal">Senegal</option>
+        <option value="Malawi">Malawi</option>
+        <option value="Zambia">Zambia</option>
+        <option value="Zimbabwe">Zimbabwe</option>
+      </select>
+      <span id="country-hint" style="font-size:12px;color:#1D9E75;display:none">&#10003; Filtering by your country</span>
+    </div>
+    <div class="filter-row">
+      <button class="btn-sm active" onclick="setFilter('all',this)">All</button>
+      <button class="btn-sm" onclick="setFilter('local',this)">&#127968; Local (my country)</button>
+      <button class="btn-sm" onclick="setFilter('national',this)">&#127963; National</button>
+      <button class="btn-sm" onclick="setFilter('regional',this)">&#127758; Regional (Africa)</button>
+      <button class="btn-sm" onclick="setFilter('international',this)">&#127757; International</button>
+      <button class="btn-sm" onclick="setFilter('free',this)">Free APC</button>
+      <button class="btn-sm" onclick="setFilter('doaj',this)">DOAJ</button>
+      <button class="btn-sm" onclick="setFilter('scopus',this)">Scopus</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="num" id="stat-total">--</div><div class="lbl">Journals found</div></div>
+      <div class="stat-card"><div class="num" id="stat-local">--</div><div class="lbl">Local &amp; National</div></div>
+      <div class="stat-card"><div class="num" id="stat-regional">--</div><div class="lbl">Regional (Africa)</div></div>
+      <div class="stat-card"><div class="num" id="stat-intl">--</div><div class="lbl">International</div></div>
+    </div>
+    <div class="journal-list" id="journal-list"></div>
+  </div>
+
+  <!-- AI MATCH TAB -->
+  <div id="tab-match" class="tab-content">
+    <div class="ai-panel">
+      <h3>Manuscript-to-journal AI matching</h3>
+      <p>Paste your manuscript title and abstract. The AI will recommend the best-fit journals based on scope, APC, and credibility.</p>
+      <textarea id="abstract-input" rows="6" placeholder="e.g. Title: Effects of heavy metal toxicity on visual cortex neurons in Wistar rats&#10;&#10;Abstract: This study investigates the neurotoxic effects of lead (Pb) exposure on morphological and functional changes in the primary visual cortex of adult Wistar rats..."></textarea>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="runAIMatch()">Find matching journals</button>
+        <button class="btn-sm" onclick="clearAbstract()">Clear</button>
+        <button class="btn-sm" onclick="loadSampleAbstract()">Load sample abstract</button>
+        <span class="ai-tag">Powered by semantic AI</span>
+      </div>
+    </div>
+    <div id="match-results"></div>
+  </div>
+
+  <!-- ALERTS TAB -->
+  <div id="tab-alerts" class="tab-content">
+    <div class="ai-panel" style="margin-bottom:16px">
+      <h3>Alert preferences</h3>
+      <p>Subscribe to fields to get notified about calls for papers, new issues, and deadlines. Click a tag to toggle it on or off.</p>
+      <div class="field-tags" id="field-tags"></div>
+      <div class="add-field-form" id="add-field-form">
+        <input type="text" id="new-field-input" placeholder="e.g. Pharmacology" maxlength="40" onkeydown="if(event.key==='Enter')addField()" />
+        <button class="btn-primary" onclick="addField()">Add</button>
+        <button class="btn-sm" onclick="closeAddField()">Cancel</button>
+      </div>
+      <button class="btn-sm" style="margin-top:8px" onclick="openAddField()" id="add-field-btn">+ Add field</button>
+    </div>
+    <div id="alerts-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="section-title" style="margin-bottom:0">Recent alerts</div>
+      <button class="btn-sm" onclick="markAllRead()">Mark all as read</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px" id="alerts-list"></div>
+  </div>
+
+  <!-- GRANTS TAB -->
+  <div id="tab-grants" class="tab-content">
+    <div class="ai-panel" style="margin-bottom:16px">
+      <h3>Find funding opportunities</h3>
+      <p>Filter grants by region, type, and funder. All listings are specifically curated for African researchers.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-sm active" onclick="setGrantFilter('all',this)">All types</button>
+        <button class="btn-sm" onclick="setGrantFilter('Research grant',this)">Research grants</button>
+        <button class="btn-sm" onclick="setGrantFilter('Fellowship',this)">Fellowships</button>
+        <button class="btn-sm" onclick="setGrantFilter('Scholarship',this)">Scholarships</button>
+        <button class="btn-sm" onclick="setGrantFilter('Nigeria',this)">Nigeria only</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px" id="grants-list"></div>
+  </div>
+
+  <!-- SAVED TAB -->
+  <div id="tab-saved" class="tab-content">
+    <div class="ai-panel" style="margin-bottom:16px">
+      <h3>Saved journals</h3>
+      <p>Journals you've saved appear here. Sign in to keep your list across sessions.</p>
+    </div>
+    <div id="saved-list"></div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="support-banner">
+  <p><strong>AcademiQ is free for every African researcher.</strong><br>If this platform has helped your work, consider supporting us to keep servers running and data fresh.</p>
+  <button class="btn-donate" onclick="openDonate()">&#9829;&nbsp; Support AcademiQ</button>
+</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ LOGIN MODAL ══ -->
+<div class="modal-overlay" id="login-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLogin()">&times;</button>
+    <div id="view-signin">
+      <h2>Welcome back</h2>
+      <p class="subtitle">Sign in to save journals, set alerts, and track your searches.</p>
+      <div class="form-group"><label>Email address</label><input type="email" id="si-email" placeholder="you@university.edu.ng" /></div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="si-password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doSignIn()" />
+        <div class="form-error" id="si-error">Incorrect email or password.</div>
+      </div>
+      <div style="text-align:right;margin-bottom:14px"><a style="font-size:12px;color:#1D9E75;cursor:pointer" onclick="showView('forgot')">Forgot password?</a></div>
+      <button class="btn-full btn-primary" onclick="doSignIn()">Sign in</button>
+      <div class="divider">or</div>
+      <button class="google-btn" onclick="doGoogleSignIn()">
+        <svg width="16" height="16" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+      <p class="modal-switch">No account? <a onclick="showView('register')">Create one — it's free</a></p>
+    </div>
+    <div id="view-register" style="display:none">
+      <h2>Create your account</h2>
+      <p class="subtitle">Free for all African researchers. Takes 30 seconds.</p>
+      <div class="form-group"><label>Full name</label><input type="text" id="reg-name" placeholder="Dr. Amina Bello" /></div>
+      <div class="form-group"><label>Email address</label><input type="email" id="reg-email" placeholder="you@university.edu.ng" /></div>
+      <div class="form-group"><label>Institution</label><input type="text" id="reg-institution" placeholder="University of Ilorin" /></div>
+      <div class="form-group"><label>Country</label>
+        <select id="reg-country">
+          <option value="">Select your country</option>
+          <option>Nigeria</option><option>Ghana</option><option>Kenya</option><option>South Africa</option>
+          <option>Ethiopia</option><option>Tanzania</option><option>Uganda</option><option>Rwanda</option>
+          <option>Cameroon</option><option>Senegal</option><option>Other African country</option><option>Outside Africa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="At least 8 characters" onkeydown="if(event.key==='Enter')doRegister()" />
+        <div class="form-error" id="reg-error">Please fill in all required fields.</div>
+      </div>
+      <button class="btn-full btn-primary" onclick="doRegister()">Create free account</button>
+      <p class="modal-switch">Already have an account? <a onclick="showView('signin')">Sign in</a></p>
+    </div>
+    <div id="view-forgot" style="display:none">
+      <h2>Reset your password</h2>
+      <p class="subtitle">Enter your email and we'll send you a reset link.</p>
+      <div class="form-group"><label>Email address</label><input type="email" id="forgot-email" placeholder="you@university.edu.ng" /></div>
+      <div class="form-success" id="forgot-success">Reset link sent! Check your inbox.</div>
+      <button class="btn-full btn-primary" onclick="doForgot()">Send reset link</button>
+      <p class="modal-switch"><a onclick="showView('signin')">&larr; Back to sign in</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DONATE MODAL ══ -->
+<div class="modal-overlay" id="donate-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDonate()">&times;</button>
+    <div id="view-donate">
+      <h2>Support AcademiQ</h2>
+      <p class="subtitle">AcademiQ is free for every African researcher. Your donation keeps the platform running — better data, faster AI, more alerts.</p>
+      <div style="font-size:12px;font-weight:500;color:#555;margin-bottom:8px">Choose an amount (USD)</div>
+      <div class="donation-amounts">
+        <div class="amt-btn" onclick="selectAmt(this,1)">$1</div>
+        <div class="amt-btn" onclick="selectAmt(this,3)">$3</div>
+        <div class="amt-btn selected" onclick="selectAmt(this,5)">$5</div>
+        <div class="amt-btn" onclick="selectAmt(this,10)">$10</div>
+        <div class="amt-btn" onclick="selectAmt(this,25)">$25</div>
+        <div class="amt-btn" onclick="selectAmt(this,50)">$50</div>
+        <div class="amt-btn" onclick="selectAmt(this,100)">$100</div>
+        <div class="amt-btn" onclick="selectAmt(this,0)">Custom</div>
+      </div>
+      <input type="number" class="custom-amt-input" id="custom-amt" placeholder="Enter amount in USD" style="display:none" min="1" oninput="updateImpact()" />
+      <div class="donation-impact" id="donate-impact">$10 covers server costs for one week, keeping journal data fresh for thousands of African researchers.</div>
+      <div style="font-size:12px;font-weight:500;color:#555;margin-bottom:8px">Pay with</div>
+      <div class="payment-row">
+        <div class="payment-opt selected" onclick="selectPayment(this)">&#128179; Card</div>
+        <div class="payment-opt" onclick="selectPayment(this)">&#128178; PayPal</div>
+        <div class="payment-opt" onclick="selectPayment(this)">&#9889; Flutterwave</div>
+        <div class="payment-opt" onclick="selectPayment(this)">&#127981; Bank transfer</div>
+      </div>
+      <div id="card-fields" style="display:block">
+        <div class="form-group"><label>Name on card</label><input type="text" id="card-name" placeholder="Dr. Adebayo Okafor" /></div>
+        <div class="form-group"><label>Card number</label><input type="text" id="card-num" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCard(this)" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="form-group"><label>Expiry</label><input type="text" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)" /></div>
+          <div class="form-group"><label>CVV</label><input type="text" placeholder="123" maxlength="3" /></div>
+        </div>
+      </div>
+      <div class="form-error" id="donate-error" style="margin-bottom:10px">Please fill in your card details.</div>
+      <button class="btn-full btn-primary" onclick="completeDonation()">Donate <span id="donate-amt-label">$10</span></button>
+      <p style="font-size:11px;color:#bbb;text-align:center;margin-top:10px">Secure payment &middot; Receipt sent by email &middot; Cancel anytime</p>
+    </div>
+    <div id="view-thankyou" style="display:none">
+      <div class="thank-you">
+        <div class="big">&#129395;</div>
+        <h3>Thank you so much!</h3>
+        <p>Your donation helps keep AcademiQ free for researchers across Africa. A receipt has been sent to your email.<br><br>Every contribution — large or small — makes a real difference to African academics trying to share their work with the world.</p>
+        <button class="btn-full btn-primary" style="margin-top:22px" onclick="closeDonate()">Back to AcademiQ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ JOURNAL DETAIL MODAL ══ -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeDetail()">&times;</button>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- ══ PROFILE MODAL ══ -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeProfile()">&times;</button>
+    <h2>My profile</h2>
+    <p class="subtitle">Manage your account and research preferences.</p>
+    <div id="profile-content"></div>
+    <div style="margin-top:16px;display:flex;gap:8px">
+      <button class="btn-full btn-primary" onclick="saveProfile()">Save changes</button>
+      <button class="btn-full" style="background:#f5f4f0;border:0.5px solid rgba(0,0,0,0.15);border-radius:8px" onclick="closeProfile()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GRANT DETAIL MODAL ══ -->
+<div class="modal-overlay" id="grant-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeGrantModal()">&times;</button>
+    <div id="grant-detail-content"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════
+   DATA
+═══════════════════════════════ */
+/* JOURNALS loaded asynchronously from journals.js */
+let JOURNALS = [];
+let _journalsLoaded = false;
+let _journalsLoading = false;
+let _onJournalsReady = null;
+
+function loadJournals(callback) {
+  if (_journalsLoaded) { callback(); return; }
+  if (_journalsLoading) { _onJournalsReady = callback; return; }
+  _journalsLoading = true;
+
+  // Show loading state in journal list
+  const el = document.getElementById('journal-list');
+  if (el) el.innerHTML = '<div class="empty"><span class="spinner"></span> Loading journals database...</div>';
+
+  const script = document.createElement('script');
+  script.src = 'journals.js';
+  script.onload = function() {
+    _journalsLoaded = true;
+    _journalsLoading = false;
+    if (_onJournalsReady) { _onJournalsReady(); _onJournalsReady = null; }
+    callback();
+  };
+  script.onerror = function() {
+    const el = document.getElementById('journal-list');
+    if (el) el.innerHTML = '<div class="empty">&#9888; Could not load journals database. Please refresh the page.</div>';
+  };
+  document.head.appendChild(script);
+}
+
+
+const ALERTS_DATA = [
+  { id:1, type:"cfp", title:"Call for Papers: Special Issue on Neurotoxicology", journal:"African Journal of Biomedical Research", deadline:"30 Apr 2025", tag:"CFP", read:false, link:"https://www.ajbrui.com" },
+  { id:2, type:"new", title:"New issue published: Vol 12 No 1", journal:"South African Journal of Science", date:"Feb 2025", tag:"New issue", read:false, link:"https://sajs.co.za" },
+  { id:3, type:"cfp", title:"Call for Papers: Heavy Metal Toxicity in Sub-Saharan Africa", journal:"Tanzania Journal of Health Research", deadline:"15 Mar 2025", tag:"CFP", read:true, link:"https://www.ajol.info/index.php/thrb" },
+  { id:4, type:"new", title:"Special Issue: African Brain Health — open for submission", journal:"West African Journal of Medicine", deadline:"1 May 2025", tag:"Special issue", read:false, link:"https://www.wajm.org" },
+  { id:5, type:"cfp", title:"Call for Papers: Emerging Contaminants & Neurological Outcomes", journal:"Neurotoxicology and Teratology", deadline:"20 Apr 2025", tag:"CFP", read:true, link:"https://www.sciencedirect.com/journal/neurotoxicology-and-teratology" },
+];
+
+const GRANTS = [
+  { id:1, funder:"TETFund", title:"National Research Fund — Health & Life Sciences", amount:"₦5M – ₦25M", deadline:"31 Mar 2025", region:"Nigeria", type:"Research grant", desc:"Open to Nigerian university lecturers. Covers laboratory costs, equipment, and conference travel. Applications via the TETFund portal.", eligibility:"Nigerian lecturers in accredited universities.", link:"https://tetfund.gov.ng" },
+  { id:2, funder:"Wellcome Trust", title:"African Institutions Initiative — Junior Investigator Award", amount:"$50,000 – $150,000", deadline:"15 Apr 2025", region:"Africa", type:"Fellowship", desc:"Supports early-career African researchers to develop their own independent research programmes within African institutions.", eligibility:"Researchers within 10 years of PhD, based at African institution.", link:"https://wellcome.org" },
+  { id:3, funder:"TWAS", title:"Research Grants for Individual Scientists in Developing Countries", amount:"$15,000", deadline:"30 Apr 2025", region:"Africa", type:"Research grant", desc:"Supports research in basic sciences by scientists working in developing countries. Equipment and consumables only.", eligibility:"Scientists at institutions in developing countries.", link:"https://twas.org" },
+  { id:4, funder:"DAAD", title:"In-Country/In-Region Scholarships — Sub-Saharan Africa", amount:"Full scholarship", deadline:"31 May 2025", region:"Africa", type:"Scholarship", desc:"Fully-funded postgraduate scholarships for sub-Saharan African students to study at African universities. Covers tuition, living costs, and health insurance.", eligibility:"Sub-Saharan African nationals for postgraduate study.", link:"https://daad.de" },
+  { id:5, funder:"NRF South Africa", title:"Competitive Programme for Rated Researchers", amount:"R100,000 – R600,000", deadline:"28 Feb 2025", region:"South Africa", type:"Research grant", desc:"Supports South African rated researchers across all disciplines. Funding for personnel, equipment, travel, and research consumables.", eligibility:"NRF-rated researchers at South African institutions.", link:"https://nrf.ac.za" },
+  { id:6, funder:"Carnegie Corporation", title:"African Scholars Programme", amount:"$20,000 – $50,000", deadline:"15 Jun 2025", region:"Africa", type:"Research grant", desc:"Supports African scholars to undertake high-quality research at African institutions. Focus on science, technology, and health.", eligibility:"African researchers at African universities.", link:"https://carnegie.org" },
+];
+
+const IMPACT_TEXT = {
+  1:"$1 helps keep AcademiQ's lights on for a day — every dollar genuinely counts. Thank you!",
+  3:"$3 covers the cost of indexing 100 new journals into the database.",
+  5:"$5 keeps the journal database updated for two days for every researcher on the platform.",
+  10:"$10 covers server costs for one week, keeping journal data fresh for thousands of African researchers.",
+  25:"$25 funds AI matching queries for a full month for a researcher at your institution.",
+  50:"$50 supports WhatsApp CFP alerts to 500 African researchers for a month.",
+  100:"$100 sponsors one full month of AJOL data scraping and credibility scoring for all users.",
+  0:"Every amount helps — thank you for your generosity."
+};
+
+/* ═══════════════════════════════
+   STATE
+═══════════════════════════════ */
+let activeFilter = 'all';
+let activeGrantFilter = 'all';
+let matchRunning = false;
+let selectedDonation = 5;
+let currentUser = null;
+let userCountry = localStorage.getItem('aq_country') || '';
+let savedJournals = JSON.parse(localStorage.getItem('aq_saved') || '[]');
+let alertsState = JSON.parse(JSON.stringify(ALERTS_DATA));
+let subscribedFields = JSON.parse(localStorage.getItem('aq_fields') || '["Neuroscience","Toxicology","African journals"]');
+
+/* ═══════════════════════════════
+   UTILS
+═══════════════════════════════ */
+function toast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+function isSaved(id) { return savedJournals.includes(id); }
+function toggleSave(id, btn) {
+  if (isSaved(id)) {
+    savedJournals = savedJournals.filter(x => x !== id);
+    toast('Journal removed from saved');
+  } else {
+    savedJournals.push(id);
+    toast('Journal saved! ★');
+  }
+  localStorage.setItem('aq_saved', JSON.stringify(savedJournals));
+  document.getElementById('saved-count').textContent = savedJournals.length;
+  if (btn) { btn.classList.toggle('saved', isSaved(id)); btn.textContent = isSaved(id) ? '★ Saved' : '☆ Save'; }
+  if (document.getElementById('tab-saved').classList.contains('visible')) renderSaved();
+}
+function setUserCountry(val) {
+  userCountry = val;
+  localStorage.setItem('aq_country', val);
+  const hint = document.getElementById('country-hint');
+  hint.style.display = val ? 'inline' : 'none';
+  filterJournals();
+  if (val) toast('Showing local journals for ' + val);
+}
+function getScopeLabel(j) {
+  if (!userCountry) return j.scope_level;
+  if (j.scope_level === 'local' && j.nationalFor === userCountry) return 'local';
+  if (j.scope_level === 'national' && j.nationalFor === userCountry) return 'national';
+  return j.scope_level;
+}
+
+/* ═══════════════════════════════
+   TABS
+═══════════════════════════════ */
+function switchTab(t, el) {
+  document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.nav-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('visible');
+  if (el) el.classList.add('active');
+  if (t==='alerts') renderAlerts();
+  if (t==='grants') renderGrants();
+  if (t==='saved') renderSaved();
+  closeDropdown();
+}
+
+/* ═══════════════════════════════
+   AUTH
+═══════════════════════════════ */
+function openLogin() { document.getElementById('login-modal').classList.add('open'); showView('signin'); }
+function closeLogin() { document.getElementById('login-modal').classList.remove('open'); }
+function showView(v) {
+  ['signin','register','forgot'].forEach(x => document.getElementById('view-'+x).style.display = x===v?'block':'none');
+  ['si-error','reg-error'].forEach(id => document.getElementById(id).classList.remove('show'));
+  document.getElementById('forgot-success').classList.remove('show');
+}
+function doSignIn() {
+  const email = document.getElementById('si-email').value.trim();
+  const pass  = document.getElementById('si-password').value;
+  if (!email||!pass) { showErr('si-error','Please enter your email and password.'); return; }
+  const stored = JSON.parse(localStorage.getItem('aq_user_'+email)||'null');
+  if (!stored||stored.password!==pass) { showErr('si-error','Incorrect email or password.'); return; }
+  loginSuccess(stored);
+}
+const GOOGLE_CLIENT_ID = '1031139351247-2bhb6h36jrjt6t6dm449v17h3qfefjlh.apps.googleusercontent.com';
+
+function doGoogleSignIn() {
+  if (typeof google === 'undefined') {
+    toast('Google sign-in is loading, please try again in a moment.');
+    return;
+  }
+  google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+    callback: async (tokenResponse) => {
+      if (tokenResponse.error) { toast('Google sign-in failed. Please try again.'); return; }
+      try {
+        const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+        });
+        const profile = await res.json();
+        loginSuccess({
+          name: profile.name || profile.email,
+          email: profile.email,
+          institution: '',
+          country: '',
+          password: '',
+          googleId: profile.sub
+        });
+        toast('Signed in with Google ✓');
+      } catch(e) {
+        toast('Could not fetch Google profile. Please try again.');
+      }
+    }
+  }).requestAccessToken();
+}
+function doRegister() {
+  const name  = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const inst  = document.getElementById('reg-institution').value.trim();
+  const country = document.getElementById('reg-country').value;
+  const pass  = document.getElementById('reg-password').value;
+  if (!name||!email||!pass) { showErr('reg-error','Please fill in all required fields.'); return; }
+  if (pass.length < 8) { showErr('reg-error','Password must be at least 8 characters.'); return; }
+  const user = { name, email, institution:inst, country, password:pass };
+  localStorage.setItem('aq_user_'+email, JSON.stringify(user));
+  loginSuccess(user);
+  toast('Account created! Welcome to AcademiQ ✓');
+}
+function doForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) return;
+  document.getElementById('forgot-success').classList.add('show');
+}
+function showErr(id, msg) { const el=document.getElementById(id); el.textContent=msg; el.classList.add('show'); }
+function loginSuccess(user) {
+  currentUser = user;
+  closeLogin();
+  document.getElementById('auth-buttons').style.display = 'none';
+  document.getElementById('user-menu-wrap').style.display = 'flex';
+  const avatarEl = document.getElementById('user-avatar');
+  if (user.avatar) {
+    avatarEl.innerHTML = '<img src="'+user.avatar+'" style="width:32px;height:32px;border-radius:50%;object-fit:cover" />';
+    avatarEl.style.padding = '0';
+  } else {
+    const initials = user.name.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    avatarEl.textContent = initials;
+  }
+  document.getElementById('dd-name').textContent = user.name;
+  document.getElementById('dd-email').textContent = user.email;
+  document.getElementById('saved-count').textContent = savedJournals.length;
+}
+function logout() {
+  currentUser = null;
+  document.getElementById('auth-buttons').style.display = 'flex';
+  document.getElementById('user-menu-wrap').style.display = 'none';
+  closeDropdown();
+  toast('Signed out.');
+}
+function toggleDropdown() { document.getElementById('user-dropdown').classList.toggle('open'); }
+function closeDropdown()  { document.getElementById('user-dropdown').classList.remove('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.user-menu')) closeDropdown(); });
+
+/* ═══════════════════════════════
+   PROFILE
+═══════════════════════════════ */
+function openProfile() {
+  closeDropdown();
+  if (!currentUser) { openLogin(); return; }
+  const u = currentUser;
+  document.getElementById('profile-content').innerHTML = `
+    <div class="form-group"><label>Full name</label><input type="text" id="p-name" value="${u.name}" /></div>
+    <div class="form-group"><label>Email</label><input type="email" id="p-email" value="${u.email}" /></div>
+    <div class="form-group"><label>Institution</label><input type="text" id="p-inst" value="${u.institution||''}" placeholder="Your university or organisation" /></div>
+    <div class="form-group"><label>Country</label>
+      <select id="p-country">
+        <option value="">Select country</option>
+        <option ${u.country==='Nigeria'?'selected':''}>Nigeria</option>
+        <option ${u.country==='Ghana'?'selected':''}>Ghana</option>
+        <option ${u.country==='Kenya'?'selected':''}>Kenya</option>
+        <option ${u.country==='South Africa'?'selected':''}>South Africa</option>
+        <option ${u.country==='Ethiopia'?'selected':''}>Ethiopia</option>
+        <option ${u.country==='Tanzania'?'selected':''}>Tanzania</option>
+        <option>Other African country</option><option>Outside Africa</option>
+      </select>
+    </div>
+    <div class="form-group"><label>Research field(s)</label><input type="text" id="p-fields" value="${subscribedFields.join(', ')}" placeholder="e.g. Neuroscience, Toxicology" /></div>
+  `;
+  document.getElementById('profile-modal').classList.add('open');
+}
+function closeProfile() { document.getElementById('profile-modal').classList.remove('open'); }
+function saveProfile() {
+  if (!currentUser) return;
+  currentUser.name = document.getElementById('p-name').value.trim() || currentUser.name;
+  currentUser.email = document.getElementById('p-email').value.trim() || currentUser.email;
+  currentUser.institution = document.getElementById('p-inst').value.trim();
+  currentUser.country = document.getElementById('p-country').value;
+  const fieldsStr = document.getElementById('p-fields').value;
+  subscribedFields = fieldsStr.split(',').map(f=>f.trim()).filter(Boolean);
+  localStorage.setItem('aq_fields', JSON.stringify(subscribedFields));
+  localStorage.setItem('aq_user_'+currentUser.email, JSON.stringify(currentUser));
+  const initials = currentUser.name.split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('user-avatar').textContent = initials;
+  document.getElementById('dd-name').textContent = currentUser.name;
+  document.getElementById('dd-email').textContent = currentUser.email;
+  closeProfile();
+  toast('Profile updated ✓');
+  renderFieldTags();
+}
+
+/* ═══════════════════════════════
+   DONATION
+═══════════════════════════════ */
+function openDonate() {
+  document.getElementById('donate-modal').classList.add('open');
+  document.getElementById('view-donate').style.display = 'block';
+  document.getElementById('view-thankyou').style.display = 'none';
+  document.getElementById('donate-error').classList.remove('show');
+}
+function closeDonate() { document.getElementById('donate-modal').classList.remove('open'); }
+function selectAmt(el, amt) {
+  document.querySelectorAll('.amt-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDonation = amt;
+  const ci = document.getElementById('custom-amt');
+  ci.style.display = amt===0 ? 'block' : 'none';
+  if (amt===0) { ci.value=''; ci.focus(); }
+  document.getElementById('donate-impact').textContent = IMPACT_TEXT[amt]||IMPACT_TEXT[0];
+  document.getElementById('donate-amt-label').textContent = amt>0 ? '$'+amt : 'now';
+}
+function updateImpact() {
+  const v = parseInt(document.getElementById('custom-amt').value)||0;
+  selectedDonation = v;
+  const key = v>=100?100:v>=50?50:v>=25?25:v>=10?10:v>=5?5:v>=3?3:1;
+  document.getElementById('donate-impact').textContent = v>0 ? IMPACT_TEXT[key] : IMPACT_TEXT[0];
+  document.getElementById('donate-amt-label').textContent = v>0 ? '$'+v : 'now';
+}
+function selectPayment(el) {
+  document.querySelectorAll('.payment-opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const isCard = el.textContent.includes('Card');
+  document.getElementById('card-fields').style.display = isCard ? 'block' : 'none';
+}
+function formatCard(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+function formatExpiry(el) {
+  let v = el.value.replace(/\D/g,'');
+  if (v.length>=2) v = v.slice(0,2)+'/'+v.slice(2,4);
+  el.value = v;
+}
+function completeDonation() {
+  const cardVisible = document.getElementById('card-fields').style.display !== 'none';
+  if (cardVisible) {
+    const name = document.getElementById('card-name').value.trim();
+    const num  = document.getElementById('card-num').value.replace(/\s/g,'');
+    if (!name || num.length < 16) { document.getElementById('donate-error').classList.add('show'); return; }
+  }
+  document.getElementById('donate-error').classList.remove('show');
+  document.getElementById('view-donate').style.display = 'none';
+  document.getElementById('view-thankyou').style.display = 'block';
+}
+
+/* ═══════════════════════════════
+   JOURNAL DISCOVERY
+═══════════════════════════════ */
+let _filterTimer = null;
+function debounceFilter() {
+  clearTimeout(_filterTimer);
+  _filterTimer = setTimeout(filterJournals, 280);
+}
+function filterJournals() {
+  loadJournals(_doFilterJournals);
+}
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-row .btn-sm').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if ((f==='local'||f==='national') && !userCountry) {
+    toast('Please select your country above first');
+  }
+  filterJournals();
+}
+function _doFilterJournals() {
+  const q = (document.getElementById('search-input').value||'').toLowerCase();
+  const filtered = JOURNALS.filter(j => {
+    const mq = !q || [j.title,j.field,j.scope,j.country,j.publisher].join(' ').toLowerCase().includes(q);
+    let mf = true;
+    if (activeFilter==='local') {
+      mf = userCountry && (j.nationalFor===userCountry) && (j.scope_level==='local'||j.scope_level==='national');
+    } else if (activeFilter==='national') {
+      mf = userCountry ? j.nationalFor===userCountry : j.scope_level==='national';
+    } else if (activeFilter==='regional') {
+      mf = j.scope_level==='regional';
+    } else if (activeFilter==='international') {
+      mf = j.scope_level==='international';
+    } else if (activeFilter==='free') {
+      mf = j.apc===0;
+    } else if (activeFilter==='doaj') {
+      mf = j.indexing.includes('DOAJ');
+    } else if (activeFilter==='scopus') {
+      mf = j.indexing.includes('Scopus');
+    }
+    return mq && mf;
+  });
+  renderJournals(filtered);
+}
+let currentPage = 1;
+const PAGE_SIZE = 20;
+let currentList = [];
+
+function renderJournals(list) {
+  currentList = list;
+  currentPage = 1;
+  document.getElementById('stat-total').textContent   = list.length;
+  document.getElementById('stat-local').textContent   = list.filter(j=>j.scope_level==='local'||j.scope_level==='national').length;
+  document.getElementById('stat-regional').textContent= list.filter(j=>j.scope_level==='regional').length;
+  document.getElementById('stat-intl').textContent    = list.filter(j=>j.scope_level==='international').length;
+  renderPage();
+}
+function renderPage() {
+  const el = document.getElementById('journal-list');
+  if (!currentList.length) { el.innerHTML='<div class="empty">No journals found. Try a different search or filter.</div>'; return; }
+  const totalPages = Math.ceil(currentList.length / PAGE_SIZE);
+  const start = (currentPage-1)*PAGE_SIZE;
+  const pageItems = currentList.slice(start, start+PAGE_SIZE);
+  el.innerHTML = pageItems.map(j => journalCardHTML(j, true)).join('') + renderPaginator(totalPages);
+}
+function renderPaginator(totalPages) {
+  if (totalPages <= 1) return '';
+  const tp = totalPages;
+  const cp = currentPage;
+  let btns = '';
+  btns += `<button class="page-btn" onclick="goPage(${Math.max(1,cp-1)})" ${cp===1?'disabled':''}>&#8592; Prev</button>`;
+  let start = Math.max(1, cp-2), end = Math.min(tp, cp+2);
+  if (start > 1) btns += `<button class="page-btn" onclick="goPage(1)">1</button>${start>2?'<span class="page-ellipsis">...</span>':''}`;
+  for (let p=start; p<=end; p++) {
+    btns += `<button class="page-btn ${p===cp?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  }
+  if (end < tp) btns += `${end<tp-1?'<span class="page-ellipsis">...</span>':''}<button class="page-btn" onclick="goPage(${tp})">${tp}</button>`;
+  btns += `<button class="page-btn" onclick="goPage(${Math.min(tp,cp+1)})" ${cp===tp?'disabled':''}>Next &#8594;</button>`;
+  return `<div class="paginator">${btns}<span class="page-info">Page ${cp} of ${tp} &middot; ${currentList.length} journals</span></div>`;
+}
+function goPage(p) {
+  currentPage = p;
+  renderPage();
+  document.getElementById('journal-list').scrollIntoView({behavior:'smooth', block:'start'});
+}
+function scopeBadge(j) {
+  const sl = j.scope_level;
+  if (sl==='local') return `<span class="badge badge-local">&#127968; Local</span>`;
+  if (sl==='national') {
+    const label = j.nationalFor ? `National (${j.nationalFor})` : 'National';
+    return `<span class="badge badge-national">&#127963; ${label}</span>`;
+  }
+  if (sl==='regional') return `<span class="badge badge-regional">&#127758; Regional (Africa)</span>`;
+  return `<span class="badge badge-intl">&#127757; International</span>`;
+}
+function journalCardHTML(j, showActions) {
+  const cc = j.credibility>=80?'#1D9E75':j.credibility>=60?'#EF9F27':'#E24B4A';
+  const apc = j.apc===0?'<span class="badge badge-free">Free APC</span>':j.waiver?`<span class="badge badge-paid">$${j.apc.toLocaleString()} (waiver avail.)</span>`:`<span class="badge badge-paid">$${j.apc.toLocaleString()} APC</span>`;
+  const reg = scopeBadge(j);
+  const ix = j.indexing.map(x=>x==='Scopus'?'<span class="badge badge-scopus">Scopus</span>':x==='DOAJ'?'<span class="badge badge-doaj">DOAJ</span>':`<span class="badge badge-intl">${x}</span>`).join('');
+  const warn = j.predatory_flag?'<span class="badge badge-warn">&#9888; Review carefully</span>':'';
+  const dot = j.accepting?'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#1D9E75;margin-right:4px"></span>Accepting':'<span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#aaa;margin-right:4px"></span>Closed';
+  const saved = isSaved(j.id);
+  const actions = showActions ? `<div class="jcard-actions">
+    <button class="jbtn submit-btn" onclick="event.stopPropagation();window.open('${j.submitUrl}','_blank')">Submit here &#8599;</button>
+    <button class="jbtn save-btn ${saved?'saved':''}" onclick="event.stopPropagation();toggleSave(${j.id},this)">${saved?'★ Saved':'☆ Save'}</button>
+    <button class="jbtn" onclick="event.stopPropagation();window.open('${j.website}','_blank')">Visit website &#8599;</button>
+    <button class="jbtn" onclick="event.stopPropagation();openDetail(${j.id})">View details</button>
+  </div>` : '';
+  return `<div class="journal-card" onclick="openDetail(${j.id})">
+    <div class="jcard-top"><div><div class="jtitle">${j.title}</div><div class="jmeta">${j.publisher} &middot; ${j.country}</div></div><div class="badges">${apc}${reg}</div></div>
+    <div class="scope-text">${j.scope}</div>
+    <div class="badges" style="margin-bottom:8px">${ix}${warn}</div>
+    <div class="jcard-bottom">
+      <div class="jstat">${dot}</div>
+      <div class="jstat apc-stat" style="font-weight:500;color:${j.apc===0?'#0F6E56':'#633806'}">
+        ${j.apc===0?'&#10003; Free to publish':(j.waiver?'APC: $'+j.apc.toLocaleString()+' (waiver)':'APC: $'+j.apc.toLocaleString())}
+      </div>
+      <div class="jstat">&#128197; ${j.lastIssue}</div>
+      <div class="jstat" style="gap:6px">&#11088;&nbsp;${j.credibility}<div class="cred-bar" style="margin-left:4px"><div class="cred-fill" style="width:${j.credibility}%;background:${cc}"></div></div></div>
+    </div>
+    ${actions}
+  </div>`;
+}
+
+/* ═══════════════════════════════
+   JOURNAL DETAIL
+═══════════════════════════════ */
+function openDetail(id) {
+  loadJournals(function() {
+  const j = JOURNALS.find(x=>x.id===id);
+  if (!j) return;
+  const cc = j.credibility>=80?'#1D9E75':j.credibility>=60?'#EF9F27':'#E24B4A';
+  const saved = isSaved(j.id);
+  document.getElementById('detail-content').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-size:18px;font-weight:500;line-height:1.4;margin-bottom:4px">${j.title}</div>
+      <div style="font-size:13px;color:#888">${j.publisher} &middot; ${j.country}</div>
+    </div>
+    <div class="badges" style="margin-bottom:16px;flex-wrap:wrap;gap:6px">
+      ${j.apc===0?'<span class="badge badge-free">Free APC</span>':j.waiver?`<span class="badge badge-paid">$${j.apc.toLocaleString()} APC (waiver available)</span>`:`<span class="badge badge-paid">$${j.apc.toLocaleString()} APC</span>`}
+      ${scopeBadge(j)}
+      ${j.indexing.map(x=>x==='Scopus'?'<span class="badge badge-scopus">Scopus</span>':x==='DOAJ'?'<span class="badge badge-doaj">DOAJ</span>':`<span class="badge badge-intl">${x}</span>`).join('')}
+      ${j.predatory_flag?'<span class="badge badge-warn">&#9888; Review carefully</span>':''}
+    </div>
+    <div class="detail-section"><h4>Scope</h4><p>${j.scope}</p></div>
+    <div class="detail-section">
+      <h4>Journal details</h4>
+      <div class="detail-row"><span class="dk">Field</span><span class="dv">${j.field}</span></div>
+      <div class="detail-row"><span class="dk">Scope level</span><span class="dv">${j.scope_level.charAt(0).toUpperCase()+j.scope_level.slice(1)}${j.nationalFor?' ('+j.nationalFor+')':''}</span></div>
+      <div class="detail-row"><span class="dk">APC</span><span class="dv">${j.apc===0?'Free':('$'+j.apc.toLocaleString()+(j.waiver?' (waiver available)':''))}</span></div>
+      <div class="detail-row"><span class="dk">Review timeline</span><span class="dv">${j.reviewWeeks}</span></div>
+      <div class="detail-row"><span class="dk">Acceptance rate</span><span class="dv">${j.acceptRate}</span></div>
+      <div class="detail-row"><span class="dk">Last issue</span><span class="dv">${j.lastIssue}</span></div>
+      <div class="detail-row"><span class="dk">Status</span><span class="dv" style="color:${j.accepting?'#1D9E75':'#888'}">${j.accepting?'Accepting submissions':'Not accepting submissions'}</span></div>
+      <div class="detail-row"><span class="dk">Credibility score</span><span class="dv" style="color:${cc}">${j.credibility}/100</span></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+      <button class="btn-primary" onclick="window.open('${j.submitUrl}','_blank')">Submit manuscript &#8599;</button>
+      <button class="jbtn save-btn ${saved?'saved':''}" style="padding:10px 14px;font-size:13px" onclick="toggleSave(${j.id},this)">${saved?'★ Saved':'☆ Save journal'}</button>
+      <button class="jbtn" style="padding:10px 14px;font-size:13px" onclick="window.open('${j.website}','_blank')">Visit website &#8599;</button>
+    </div>
+  `;
+  document.getElementById('detail-modal').classList.add('open');
+  }); // end loadJournals
+}
+function closeDetail() { document.getElementById('detail-modal').classList.remove('open'); }
+
+/* ═══════════════════════════════
+   SAVED JOURNALS
+═══════════════════════════════ */
+function openSavedFromMenu() {
+  closeDropdown();
+  switchTab('saved', document.querySelectorAll('.nav-btn')[4]);
+}
+function renderSaved() {
+  loadJournals(function() {
+  const el = document.getElementById('saved-list');
+  const list = JOURNALS.filter(j => savedJournals.includes(j.id));
+  if (!list.length) {
+    el.innerHTML = '<div class="saved-empty">No saved journals yet.<br>Browse the Discover tab and click ☆ Save on journals you like.</div>';
+    return;
+  }
+  el.innerHTML = '<div class="journal-list">'+list.map(j => journalCardHTML(j, true)).join('')+'</div>';
+  }); // end loadJournals
+}
+
+/* ═══════════════════════════════
+   ALERTS
+═══════════════════════════════ */
+function renderAlerts() {
+  renderFieldTags();
+  const el = document.getElementById('alerts-list');
+  el.innerHTML = alertsState.map(a => `
+    <div class="alert-card" style="${a.read?'opacity:.65':''}">
+      <div class="alert-dot ${a.type}"></div>
+      <div style="flex:1">
+        <div class="alert-title">${a.title}</div>
+        <div class="alert-meta">${a.journal} &middot; ${a.deadline?'Deadline: '+a.deadline:a.date}</div>
+        <div class="alert-actions">
+          <button class="jbtn" onclick="window.open('${a.link}','_blank')">View journal &#8599;</button>
+          ${!a.read?`<button class="jbtn" onclick="markRead(${a.id},this)">Mark as read</button>`:'<span style="font-size:11px;color:#aaa">Read</span>'}
+          <button class="jbtn" onclick="dismissAlert(${a.id})">Dismiss</button>
+        </div>
+      </div>
+      <span class="badge ${a.type==='cfp'?'badge-free':'badge-doaj'}">${a.tag}</span>
+    </div>`).join('');
+}
+function markRead(id, btn) {
+  const a = alertsState.find(x=>x.id===id);
+  if (a) a.read = true;
+  renderAlerts();
+}
+function markAllRead() {
+  alertsState.forEach(a => a.read = true);
+  renderAlerts();
+  toast('All alerts marked as read');
+}
+function dismissAlert(id) {
+  alertsState = alertsState.filter(x=>x.id!==id);
+  renderAlerts();
+  toast('Alert dismissed');
+}
+function renderFieldTags() {
+  const el = document.getElementById('field-tags');
+  el.innerHTML = subscribedFields.map(f => `
+    <div class="field-tag active">
+      ${f}
+      <span class="remove" onclick="removeField('${f}')" title="Remove">&times;</span>
+    </div>`).join('');
+}
+function openAddField() {
+  document.getElementById('add-field-form').classList.add('open');
+  document.getElementById('add-field-btn').style.display = 'none';
+  document.getElementById('new-field-input').focus();
+}
+function closeAddField() {
+  document.getElementById('add-field-form').classList.remove('open');
+  document.getElementById('add-field-btn').style.display = '';
+  document.getElementById('new-field-input').value = '';
+}
+function addField() {
+  const val = document.getElementById('new-field-input').value.trim();
+  if (!val) return;
+  if (!subscribedFields.includes(val)) {
+    subscribedFields.push(val);
+    localStorage.setItem('aq_fields', JSON.stringify(subscribedFields));
+    toast(`Subscribed to "${val}"`);
+  }
+  closeAddField();
+  renderFieldTags();
+}
+function removeField(f) {
+  subscribedFields = subscribedFields.filter(x=>x!==f);
+  localStorage.setItem('aq_fields', JSON.stringify(subscribedFields));
+  renderFieldTags();
+  toast(`Unsubscribed from "${f}"`);
+}
+function openAlertSettings() { closeDropdown(); switchTab('alerts', document.querySelectorAll('.nav-btn')[2]); }
+
+/* ═══════════════════════════════
+   GRANTS
+═══════════════════════════════ */
+function setGrantFilter(f, el) {
+  activeGrantFilter = f;
+  document.querySelectorAll('#tab-grants .btn-sm').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderGrants();
+}
+function renderGrants() {
+  const filtered = GRANTS.filter(g => {
+    if (activeGrantFilter==='all') return true;
+    return g.type===activeGrantFilter || g.region===activeGrantFilter;
+  });
+  const el = document.getElementById('grants-list');
+  if (!filtered.length) { el.innerHTML='<div class="empty">No grants found for this filter.</div>'; return; }
+  el.innerHTML = filtered.map(g => `
+    <div class="journal-card">
+      <div class="jcard-top">
+        <div><div class="jtitle">${g.title}</div><div class="jmeta">${g.funder} &middot; ${g.region}</div></div>
+        <div class="badges"><span class="badge badge-free">${g.amount}</span></div>
+      </div>
+      <div class="scope-text">${g.desc}</div>
+      <div class="jcard-bottom">
+        <div class="jstat">Deadline: <strong style="color:#1a1a18">${g.deadline}</strong></div>
+        <span class="badge badge-intl">${g.type}</span>
+      </div>
+      <div class="jcard-actions">
+        <button class="jbtn submit-btn" onclick="window.open('${g.link}','_blank')">Apply now &#8599;</button>
+        <button class="jbtn" onclick="openGrantDetail(${g.id})">View details</button>
+        <button class="jbtn" onclick="copyGrantLink(${g.id})">Copy link</button>
+      </div>
+    </div>`).join('');
+}
+function openGrantDetail(id) {
+  const g = GRANTS.find(x=>x.id===id);
+  if (!g) return;
+  document.getElementById('grant-detail-content').innerHTML = `
+    <div style="font-size:18px;font-weight:500;margin-bottom:4px">${g.title}</div>
+    <div style="font-size:13px;color:#888;margin-bottom:16px">${g.funder} &middot; ${g.region}</div>
+    <div class="badges" style="margin-bottom:16px"><span class="badge badge-free">${g.amount}</span><span class="badge badge-intl">${g.type}</span></div>
+    <div class="detail-section"><h4>About this grant</h4><p>${g.desc}</p></div>
+    <div class="detail-section"><h4>Eligibility</h4><p>${g.eligibility}</p></div>
+    <div class="detail-row"><span class="dk">Deadline</span><span class="dv" style="color:#c0392b">${g.deadline}</span></div>
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn-primary" onclick="window.open('${g.link}','_blank')">Apply now &#8599;</button>
+      <button class="jbtn" style="padding:10px 14px;font-size:13px" onclick="copyGrantLink(${g.id})">Copy link</button>
+    </div>
+  `;
+  document.getElementById('grant-modal').classList.add('open');
+}
+function closeGrantModal() { document.getElementById('grant-modal').classList.remove('open'); }
+function copyGrantLink(id) {
+  const g = GRANTS.find(x=>x.id===id);
+  if (!g) return;
+  navigator.clipboard.writeText(g.link).then(() => toast('Grant link copied!')).catch(() => toast('Link: '+g.link));
+}
+
+/* ═══════════════════════════════
+   AI MATCH
+═══════════════════════════════ */
+function clearAbstract() { document.getElementById('abstract-input').value=''; document.getElementById('match-results').innerHTML=''; }
+function loadSampleAbstract() {
+  document.getElementById('abstract-input').value = `Title: Effects of lead exposure on visual cortex neurons in Wistar rats\n\nAbstract: This study investigates the neurotoxic effects of lead (Pb) exposure on morphological and functional changes in the primary visual cortex of adult Wistar rats. Histological analysis revealed significant neuronal loss and glial activation in layers IV–VI following chronic low-dose Pb exposure over 12 weeks. Immunohistochemical staining showed increased GFAP expression in astrocytes and reduced NeuN-positive neurons. Our findings from this African laboratory context suggest that environmental lead toxicity poses a significant neurotoxicological risk.`;
+  toast('Sample abstract loaded');
+}
+function runAIMatch() {
+  if (matchRunning) return;
+  const text = (document.getElementById('abstract-input').value||'').trim();
+  if (!text) { document.getElementById('match-results').innerHTML='<div class="empty">Please paste your manuscript title and abstract above.</div>'; return; }
+  matchRunning = true;
+  document.getElementById('match-results').innerHTML='<div style="padding:20px 0;color:#888;font-size:14px"><span class="spinner"></span>Analysing your abstract and ranking journals...</div>';
+  loadJournals(function() { setTimeout(()=>{
+    matchRunning = false;
+    const lt = text.toLowerCase();
+    const scored = JOURNALS.filter(j=>!j.predatory_flag).map(j=>{
+      let s = 35+Math.floor(Math.random()*15);
+      const w = (j.scope+' '+j.field+' '+j.title).toLowerCase();
+      if (lt.includes('neuro')&&w.includes('neuro')) s+=28;
+      if (lt.includes('toxico')&&w.includes('toxico')) s+=28;
+      if (lt.includes('visual')&&(w.includes('ophthal')||w.includes('neuro'))) s+=14;
+      if (lt.includes('africa')&&j.region==='africa') s+=12;
+      if ((lt.includes('rat')||lt.includes('wistar')||lt.includes('animal'))&&w.includes('biomed')) s+=10;
+      if (lt.includes('health')&&w.includes('health')) s+=8;
+      if (lt.includes('medicine')&&w.includes('medicine')) s+=8;
+      if (j.credibility>=88) s+=8;
+      if (j.credibility>=80) s+=4;
+      if (j.apc===0) s+=6;
+      if (j.indexing.includes('Scopus')) s+=4;
+      return {...j, score:Math.min(s,99)};
+    }).sort((a,b)=>b.score-a.score).slice(0,6);
+    document.getElementById('match-results').innerHTML=`
+      <div class="section-title" style="margin-bottom:10px">Top ${scored.length} matches for your manuscript</div>
+      <div class="journal-list">${scored.map(j=>{
+        const cc=j.credibility>=80?'#1D9E75':'#EF9F27';
+        const sc=j.score>=72?'score-high':'score-mid';
+        const apc=j.apc===0?'<span class="badge badge-free">Free APC</span>':`<span class="badge badge-paid">$${j.apc.toLocaleString()}</span>`;
+        const ix=j.indexing.slice(0,2).map(x=>x==='Scopus'?'<span class="badge badge-scopus">Scopus</span>':x==='DOAJ'?'<span class="badge badge-doaj">DOAJ</span>':`<span class="badge badge-intl">${x}</span>`).join('');
+        const saved=isSaved(j.id);
+        return `<div class="journal-card" onclick="openDetail(${j.id})">
+          <div class="jcard-top"><div style="flex:1"><div class="jtitle">${j.title}</div><div class="jmeta">${j.publisher} &middot; ${j.country}</div></div><div class="badges">${apc}<span class="match-score ${sc}">${j.score}% match</span></div></div>
+          <div class="scope-text">${j.scope}</div>
+          <div class="badges" style="margin-bottom:8px">${ix}</div>
+          <div class="jcard-bottom">
+              <div class="jstat" style="font-weight:500;color:${j.apc===0?'#0F6E56':'#633806'}">${j.apc===0?'&#10003; Free to publish':(j.waiver?'APC $'+j.apc.toLocaleString()+' (waiver)':'APC $'+j.apc.toLocaleString())}</div>
+              <div class="jstat">&#11088;&nbsp;${j.credibility}<div class="cred-bar" style="margin-left:4px"><div class="cred-fill" style="width:${j.credibility}%;background:${cc}"></div></div></div>
+              <div class="jstat">&#128336; ${j.reviewWeeks}</div>
+              <div class="jstat">Accept: ${j.acceptRate}</div>
+            </div>
+          <div class="jcard-actions">
+            <button class="jbtn submit-btn" onclick="event.stopPropagation();window.open('${j.submitUrl}','_blank')">Submit here &#8599;</button>
+            <button class="jbtn save-btn ${saved?'saved':''}" onclick="event.stopPropagation();toggleSave(${j.id},this)">${saved?'★ Saved':'☆ Save'}</button>
+            <button class="jbtn" onclick="event.stopPropagation();openDetail(${j.id})">View details</button>
+          </div>
+        </div>`;
+      }).join('')}</div>`;
+  },1800);
+}
+
+/* ═══════════════════════════════
+   INIT
+═══════════════════════════════ */
+const sectionTitle = document.createElement('style');
+sectionTitle.textContent = '.section-title{font-size:11px;font-weight:500;color:#999;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}';
+document.head.appendChild(sectionTitle);
+
+// Trigger journal load immediately in background
+loadJournals(function() { filterJournals(); });
+document.getElementById('saved-count').textContent = savedJournals.length;
+if (userCountry) {
+  document.getElementById('user-country-select').value = userCountry;
+  document.getElementById('country-hint').style.display = 'inline';
+}
+</script>
+</body>
+</html>
