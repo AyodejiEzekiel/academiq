@@ -631,231 +631,73 @@ const PURLS = {
 };
 
 function getUrls(pub, title) {
-  // Build a URL-safe slug from the journal title
-  const slug = (title||pub).toLowerCase()
-    .replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').slice(0,60);
   const q = encodeURIComponent(title || pub);
+  const gs = 'https://scholar.google.com/scholar?q=' + q;  // journal-specific search
 
-  // ── International publishers ─────────────────────────────────
-  if (pub === 'Elsevier')
-    return ['https://www.sciencedirect.com/search?qs='+q,
-            'https://www.editorialmanager.com/choose-journal'];
-  if (pub === 'Wiley')
-    return ['https://onlinelibrary.wiley.com/action/doSearch?AllField='+q,
-            'https://authorservices.wiley.com/author-resources/Journal-Authors/submission/index.html'];
-  if (pub === 'Springer Nature')
-    return ['https://link.springer.com/search?query='+q,
-            'https://submission.springernature.com'];
-  if (pub === 'Taylor & Francis')
-    return ['https://www.tandfonline.com/action/doSearch?AllField='+q,
-            'https://authorservices.taylorandfrancis.com/publishing-open-access/'];
-  if (pub === 'SAGE Publications')
-    return ['https://journals.sagepub.com/action/doSearch?AllField='+q,
-            'https://mc.manuscriptcentral.com/sage'];
-  if (pub === 'Oxford University Press')
-    return ['https://academic.oup.com/journals/search-results?q='+q,
-            'https://mc.manuscriptcentral.com/oup'];
-  if (pub === 'Cambridge University Press')
-    return ['https://www.cambridge.org/core/search?q='+q,
-            'https://mc.manuscriptcentral.com/cup'];
-  if (pub === 'BMJ Publishing Group')
-    return ['https://www.bmj.com/search/'+q,
-            'https://submit.bmj.com'];
-  if (pub === 'American Medical Association')
-    return ['https://jamanetwork.com/searchresults?q='+q,
-            'https://manuscript.jama.com'];
-  if (pub === 'Nature Publishing Group')
-    return ['https://www.nature.com/search?q='+q,
-            'https://mts-nature.nature.com'];
-  if (pub === 'BioMed Central')
-    return ['https://www.biomedcentral.com/search?query='+q,
-            'https://submission.biomedcentral.com'];
-  if (pub === 'Frontiers Media')
-    return ['https://www.frontiersin.org/search?query='+q,
-            'https://www.frontiersin.org/submission/submit'];
-  if (pub === 'MDPI')
-    return ['https://www.mdpi.com/search?journal_type=all&q='+q,
-            'https://susy.mdpi.com'];
-  if (pub === 'Hindawi')
-    return ['https://www.hindawi.com/search/?q='+q,
-            'https://mts.hindawi.com'];
-  if (pub === 'Karger')
-    return ['https://www.karger.com/Journals/Home?filter='+q,
-            'https://karger.com/pages/for-authors/submit'];
-  if (pub === 'Thieme')
-    return ['https://www.thieme-connect.de/products/all/all.html',
-            'https://mc.manuscriptcentral.com/thieme'];
-  if (pub === 'American Chemical Society')
-    return ['https://pubs.acs.org/action/doSearch?AllField='+q,
-            'https://pubs.acs.org/pb-assets/documents/author-information/acs-submission-guide.pdf'];
-  if (pub === 'Cell Press')
-    return ['https://www.cell.com/action/doSearch?query='+q,
-            'https://www.editorialmanager.com/cell'];
-  if (pub === 'Public Library of Science')
-    return ['https://journals.plos.org/plosone/search?q='+q,
-            'https://journals.plos.org/plosone/s/submit-now'];
-  if (pub === 'PeerJ')
-    return ['https://peerj.com/search/?q='+q,
-            'https://peerj.com/submissions/new/'];
-  if (pub === 'Dove Medical Press')
-    return ['https://www.dovepress.com/'+slug+'.html',
-            'https://www.dovepress.com/submission'];
-  if (pub === 'Bentham Science')
-    return ['https://benthamscience.com/search/?q='+q,
-            'https://benthamscience.com/for-authors/submit.php'];
-  if (pub === 'IOS Press')
-    return ['https://www.iospress.com/catalog/search?q='+q,
-            'https://www.iospress.com/for-authors'];
-  if (pub === 'Walter de Gruyter')
-    return ['https://www.degruyter.com/search#q='+q,
-            'https://www.degruyter.com/publish-with-us/publish-your-article'];
-  if (pub === 'Sciendo')
-    return ['https://sciendo.com/search/'+q,
-            'https://sciendo.com/for-authors/submit'];
-  if (pub === 'Brill')
-    return ['https://brill.com/search?q='+q,
-            'https://brill.com/publish-with-brill/publish-a-journal-article'];
-  if (pub === 'Mary Ann Liebert')
-    return ['https://home.liebertpub.com/search/?q='+q,
-            'https://mc.manuscriptcentral.com/mal'];
-  if (pub === 'World Scientific')
-    return ['https://www.worldscientific.com/action/doSearch?query='+q,
-            'https://www.worldscientific.com/page/authors/instructions-for-contributors'];
-  if (pub === 'Wolters Kluwer')
-    return ['https://journals.lww.com/pages/results.aspx?Q='+q,
-            'https://mc.manuscriptcentral.com/lww'];
-  if (pub === 'Lancet Publishing Group')
-    return ['https://www.thelancet.com/action/doSearch?query='+q,
-            'https://www.editorialmanager.com/thelancet'];
-  if (pub === 'Royal Society of Chemistry')
-    return ['https://www.rsc.org/journals-books-databases/search/#q='+q,
-            'https://mc.manuscriptcentral.com/rsc'];
-  if (pub === 'IEEE')
-    return ['https://ieeexplore.ieee.org/rest/search?queryText='+q,
-            'https://ieeeauthorcenter.ieee.org/submit-and-manage-your-article/'];
-  if (pub === 'Association for Computing Machinery')
-    return ['https://dl.acm.org/action/doSearch?query='+q,
-            'https://authors.acm.org/author-resources/author-gateway'];
-  if (pub === 'American Geophysical Union')
-    return ['https://agupubs.onlinelibrary.wiley.com/action/doSearch?AllField='+q,
-            'https://www.agu.org/publish-with-agu'];
-  if (pub === 'Society for Neuroscience')
-    return ['https://www.jneurosci.org/search/1?fulltext='+q,
-            'https://www.eneuro.org/submit'];
-  if (pub === 'Canadian Medical Association')
-    return ['https://www.cmaj.ca/search/1?fulltext='+q,
-            'https://www.cmaj.ca/page/authors/page'];
-  if (pub === 'CSIRO Publishing')
-    return ['https://www.publish.csiro.au/journals/search?q='+q,
-            'https://www.publish.csiro.au/for-authors'];
-  if (pub === 'Korean Medical Association')
-    return ['https://ekjm.org/search.php?where=aview&id='+q,
-            'https://www.editorialmanager.com/kma'];
-  if (pub === 'Brazilian Medical Association')
-    return ['https://www.ramb.org.br/en/content/?q='+q,
-            'https://www.ramb.org.br/submission'];
-  if (pub === 'Turkish Medical Association')
-    return ['https://www.ttb.org.tr/en/search/?q='+q,
-            'https://mc.manuscriptcentral.com/ttb'];
-  if (pub === 'Malaysian Medical Association')
-    return ['https://www.e-mjm.org/search.php?search='+q,
-            'https://www.e-mjm.org/authors.html'];
-  if (pub === 'New Zealand Medical Association')
-    return ['https://www.nzmj.com/search?q='+q,
-            'https://www.nzmj.com/journal/submit-a-manuscript'];
-  if (pub === 'Gulf Medical University')
-    return ['https://www.gmu.ac.ae/research/journals',
-            'https://www.editorialmanager.com/gmu'];
-  if (pub === 'Saudi Medical Association')
-    return ['https://www.smj.org.sa/index.php/smj/search/search?simpleQuery='+q,
-            'https://www.smj.org.sa/index.php/smj/about/submissions'];
+  // Submit URLs by publisher
+  const submitMap = {
+    'Elsevier':                   'https://www.editorialmanager.com/choose-journal',
+    'Wiley':                      'https://authorservices.wiley.com/author-resources/Journal-Authors/submission/index.html',
+    'Springer Nature':            'https://submission.springernature.com',
+    'Taylor & Francis':           'https://mc.manuscriptcentral.com/tandf',
+    'SAGE Publications':          'https://mc.manuscriptcentral.com/sage',
+    'Oxford University Press':    'https://mc.manuscriptcentral.com/oup',
+    'Cambridge University Press': 'https://mc.manuscriptcentral.com/cup',
+    'BMJ Publishing Group':       'https://submit.bmj.com',
+    'American Medical Association':'https://manuscript.jama.com',
+    'Nature Publishing Group':    'https://mts-nature.nature.com',
+    'BioMed Central':             'https://submission.biomedcentral.com',
+    'Frontiers Media':            'https://www.frontiersin.org/submission/submit',
+    'MDPI':                       'https://susy.mdpi.com',
+    'Hindawi':                    'https://mts.hindawi.com',
+    'Karger':                     'https://karger.com/pages/for-authors/submit',
+    'Thieme':                     'https://mc.manuscriptcentral.com/thieme',
+    'American Chemical Society':  'https://pubs.acs.org/page/4authors/submission/index.html',
+    'Cell Press':                 'https://www.editorialmanager.com/cell',
+    'Public Library of Science':  'https://journals.plos.org/plosone/s/submit-now',
+    'PeerJ':                      'https://peerj.com/submissions/new/',
+    'Dove Medical Press':         'https://www.dovepress.com/submission',
+    'Bentham Science':            'https://benthamscience.com/for-authors/submit.php',
+    'IOS Press':                  'https://www.iospress.com/for-authors',
+    'Walter de Gruyter':          'https://www.degruyter.com/publish-with-us/publish-your-article',
+    'Sciendo':                    'https://sciendo.com/for-authors/submit',
+    'Brill':                      'https://brill.com/publish-with-brill/publish-a-journal-article',
+    'Mary Ann Liebert':           'https://mc.manuscriptcentral.com/mal',
+    'World Scientific':           'https://www.worldscientific.com/page/authors/instructions-for-contributors',
+    'Wolters Kluwer':             'https://mc.manuscriptcentral.com/lww',
+    'Lancet Publishing Group':    'https://www.editorialmanager.com/thelancet',
+    'Royal Society of Chemistry': 'https://mc.manuscriptcentral.com/rsc',
+    'IEEE':                       'https://ieeeauthorcenter.ieee.org/submit-and-manage-your-article/',
+    'Association for Computing Machinery': 'https://authors.acm.org/author-resources/author-gateway',
+    'American Geophysical Union': 'https://www.agu.org/publish-with-agu',
+    'Society for Neuroscience':   'https://www.eneuro.org/submit',
+    'Canadian Medical Association':'https://www.cmaj.ca/page/authors/page',
+    'CSIRO Publishing':           'https://www.publish.csiro.au/for-authors',
+    'Korean Medical Association': 'https://www.editorialmanager.com/kma',
+    'Brazilian Medical Association':'https://www.ramb.org.br/submission',
+    'Turkish Medical Association':'https://mc.manuscriptcentral.com/ttb',
+    'Malaysian Medical Association':'https://www.e-mjm.org/authors.html',
+    'New Zealand Medical Association':'https://www.nzmj.com/journal/submit-a-manuscript',
+    'Gulf Medical University':    'https://www.editorialmanager.com/gmu',
+    'Saudi Medical Association':  'https://www.smj.org.sa/index.php/smj/about/submissions',
+    'AJOL':                       'https://www.ajol.info/index.php/index/submissions',
+    'Academic Journals':          'https://academicjournals.org/submission',
+    'AOSIS Publishing':           'https://aosis.co.za/submit',
+    'AOSIS':                      'https://aosis.co.za/submit',
+    'West African College of Physicians': 'https://www.wajm.org/index.php/wajm/about/submissions',
+    'East African Medical Research Council': 'https://www.eamj.com/index.php/eamj/about/submissions',
+    'African Academy of Sciences':'https://www.aasciences.africa/submit',
+    'CODESRIA':                   'https://www.codesria.org/spip.php?rubrique62',
+    'Covenant University':        'https://journals.covenantuniversity.edu.ng/index.php/cujournals/about/submissions',
+    'University of Ibadan':       'https://www.ajbrui.com/index.php/ajbr/about/submissions',
+  };
 
-  // ── African publishers ────────────────────────────────────────
-  if (pub === 'AJOL')
-    return ['https://www.ajol.info/index.php/index/search/search?simpleQuery='+q,
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'Academic Journals')
-    return ['https://academicjournals.org/journal/search?q='+q,
-            'https://academicjournals.org/submission'];
-  if (pub === 'AOSIS Publishing' || pub === 'AOSIS')
-    return ['https://aosis.co.za/journals',
-            'https://aosis.co.za/submit'];
-  if (pub === 'West African College of Physicians')
-    return ['https://www.wajm.org',
-            'https://www.wajm.org/index.php/wajm/about/submissions'];
-  if (pub === 'East African Medical Research Council')
-    return ['https://www.eamj.com',
-            'https://www.eamj.com/index.php/eamj/about/submissions'];
-  if (pub === 'African Academy of Sciences')
-    return ['https://www.aasciences.africa/journals',
-            'https://www.aasciences.africa/submit'];
-  if (pub === 'CODESRIA')
-    return ['https://www.codesria.org/spip.php?rubrique62',
-            'https://www.codesria.org/spip.php?rubrique62'];
+  const submit = submitMap[pub]
+    || 'https://www.ajol.info/index.php/index/submissions';
 
-  // ── African universities → AJOL search with journal title ────
-  if (pub === 'Covenant University')
-    return ['https://journals.covenantuniversity.edu.ng',
-            'https://journals.covenantuniversity.edu.ng/index.php/cujournals/about/submissions'];
-  if (pub === 'University of Ibadan')
-    return ['https://www.ajol.info/index.php/index/search/search?simpleQuery='+q,
-            'https://www.ajbrui.com/index.php/ajbr/about/submissions'];
-  if (pub === 'University of Cape Town')
-    return ['https://journals.uct.ac.za',
-            'https://open.uct.ac.za/submit'];
-  if (pub === 'Stellenbosch University')
-    return ['https://journals.sun.ac.za',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'University of Pretoria')
-    return ['https://journals.up.ac.za',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'Wits University')
-    return ['https://journals.wits.ac.za',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'Addis Ababa University' || pub === 'Jimma University')
-    return ['https://www.ejhs.org',
-            'https://www.ejhs.org/index.php/ejhs/about/submissions'];
-  if (pub === 'University of Nairobi')
-    return ['https://journals.uonbi.ac.ke',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'Makerere University')
-    return ['https://journals.mak.ac.ug',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'University of Rwanda')
-    return ['https://journals.ur.ac.rw',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'University of Dar es Salaam')
-    return ['https://journals.udsm.ac.tz',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'Muhimbili University')
-    return ['https://journals.muhas.ac.tz',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'Cairo University')
-    return ['https://journals.cu.edu.eg',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'Cheikh Anta Diop University')
-    return ['https://journals.ucad.sn',
-            'https://www.ajol.info/index.php/index/submissions'];
-  if (pub === 'University of Ghana' || pub === 'Kwame Nkrumah University' ||
-      pub === 'University of Cape Coast' || pub === 'Kenyatta University' ||
-      pub === 'Moi University' || pub === 'Hawassa University' ||
-      pub === 'Mekelle University' || pub === 'Mbarara University' ||
-      pub === 'University of Zambia' || pub === 'University of Zimbabwe' ||
-      pub === 'University of Malawi' || pub === 'University of Tunis' ||
-      pub === 'Mohammed V University' || pub === 'University of Algiers' ||
-      pub === 'University of Khartoum' || pub === 'University of Cameroon')
-    return ['https://www.ajol.info/index.php/index/search/search?simpleQuery='+q,
-            'https://www.ajol.info/index.php/index/submissions'];
-
-  // All other African universities → AJOL search
-  const AFWORDS = ['University','College','Institute','Polytechnic','Academy'];
-  if (AFWORDS.some(w => pub.includes(w)))
-    return ['https://www.ajol.info/index.php/index/search/search?simpleQuery='+q,
-            'https://www.ajol.info/index.php/index/submissions'];
-
-  // Final fallback → Google Scholar search
-  return ['https://scholar.google.com/scholar?q='+q,
-          'https://scholar.google.com/scholar?q='+encodeURIComponent('submit to '+pub)];
+  // Website: use Google Scholar to find the specific journal
+  // This guarantees every journal gets a unique, useful link
+  return [gs, submit];
 }
 
 
