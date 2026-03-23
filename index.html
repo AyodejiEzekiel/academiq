@@ -251,7 +251,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-he
 .wbtns{display:flex;flex-direction:column;gap:8px}
 .wb1{background:var(--green);color:#fff;border:none;border-radius:var(--r);padding:11px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:opacity .15s;width:100%}
 .wb1:hover{opacity:.88}
-.wb2{background:var(--al);color:var(--ad);border:1px solid #f5c97a;border-radius:var(--r);padding:9px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;width:100%}
+.wb2{background:#FFF3E0;color:#5D3200;border:1px solid #FFCC80;border-radius:var(--r);padding:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;width:100%}
 .wb2:hover{background:#faeeda}
 .wskip{text-align:center;font-size:11px;color:var(--t3);margin-top:8px;cursor:pointer}
 .wskip:hover{color:var(--t2)}
@@ -274,7 +274,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-he
     </div>
   </div>
   <div class="tb-r">
-    <button class="btn-donate" onclick="openDonate()">&#9829; Support us</button>
+    <button class="btn-donate" onclick="openDonate()">&#9749; Buy us a coffee</button>
     <div id="auth-btns"><button class="btn-login" onclick="openLogin()">Sign in / Register</button></div>
     <div id="user-menu" class="av-wrap" style="display:none">
       <div class="av" id="user-av" onclick="toggleDd()">--</div>
@@ -309,7 +309,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-he
   <div class="sb-div"></div>
   <div class="sbl">Browse by Category</div>
   <div id="cat-list"></div>
-  <div class="sb-sup"><p>Keep AcademiQ free for African researchers</p><button onclick="openDonate()">&#9829; Support from $1</button></div>
+  <div class="sb-sup"><p>Keep AcademiQ free for African researchers</p><button onclick="openDonate()">&#9749; Buy us a coffee</button></div>
 </aside>
 <main class="main">
 <!-- DISCOVER -->
@@ -516,13 +516,18 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-he
   <div class="wp">
     <button class="wc" onclick="closeWelcome()">&times;</button>
     <div class="wlogo"><div class="wlm"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="white" stroke-width="1.5"/><path d="M5 9h8M9 5v8" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><span class="wlt">Academi<span>Q</span></span></div>
-    <div class="wh">Find the right journal for your research</div>
-    <div class="ws">5,000+ curated journals &middot; 26 disciplines &middot; 44+ countries &middot; Free</div>
-    <div class="wbtns">
-      <button class="wb1" onclick="closeWelcome()">&#128269; Start Discovering</button>
-      <button class="wb2" onclick="closeWelcome();openDonate()">&#9829; Support from $1</button>
+    <div class="wh">&#127891; Find your perfect journal!</div>
+    <div class="ws">5,000+ journals &middot; 26 disciplines &middot; 44+ countries &middot; 100% Free &#127759;</div>
+    <div style="background:#FFF8F0;border-radius:12px;padding:14px 16px;margin-bottom:14px;border:1px solid #fde8c0;text-align:center">
+      <div style="font-size:22px;margin-bottom:6px">&#9749;</div>
+      <div style="font-size:14px;font-weight:600;color:#3d2000;margin-bottom:4px">Buy us a coffee! &#128522;</div>
+      <div style="font-size:12px;color:#7a4500;line-height:1.5">AcademiQ is free for every African researcher &#127758;<br>A small donation keeps the lights on &#128161;</div>
     </div>
-    <div class="wskip" onclick="closeWelcome();neverShowWelcome()">Don't show this again</div>
+    <div class="wbtns">
+      <button class="wb1" onclick="closeWelcome()">&#128269; Start Discovering Journals</button>
+      <button class="wb2" onclick="closeWelcome();openDonate()">&#9749; Buy us a coffee — from $1</button>
+    </div>
+    <div class="wskip" onclick="closeWelcome();neverShowWelcome()">No thanks, maybe later &#128522;</div>
   </div>
 </div>
 <script>
