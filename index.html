@@ -270,10 +270,11 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-he
   </div>
   <div class="tb-c">
     <div class="tb-s"><span class="tb-si">&#128269;</span>
-      <input type="text" id="search-top" placeholder="Search 5,000+ journals..." oninput="document.getElementById('search-main').value=this.value;debounceFilter()">
+      <input type="text" id="search-top" placeholder="Search 1,000,000+ journals..." oninput="document.getElementById('search-main').value=this.value;debounceFilter()">
     </div>
   </div>
   <div class="tb-r">
+    <button class="btn-sm" onclick="openSupaSettings()" title="Configure Supabase" style="padding:7px 10px;font-size:13px">&#9881;</button>
     <button class="btn-donate" onclick="openDonate()">&#9749; Buy us a coffee</button>
     <div id="auth-btns"><button class="btn-login" onclick="openLogin()">Sign in / Register</button></div>
     <div id="user-menu" class="av-wrap" style="display:none">
@@ -316,9 +317,9 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-he
 <div id="tab-discover" class="tc vis">
   <div class="hero">
     <h2>Find journals for your research</h2>
-    <p>Search 5,000+ curated journals across 26 disciplines and 44+ countries. Free for African academics.</p>
+    <p>Search 1,000,000+ journals across 26 disciplines and 44+ countries. Free for African academics.</p>
     <div class="sr">
-      <input type="text" id="search-main" placeholder="Search by title, field, category, country..." oninput="document.getElementById('search-top').value=this.value;debounceFilter()">
+      <input type="text" id="search-main" placeholder="Search 1,000,000+ journals by title, field, category, country..." oninput="document.getElementById('search-top').value=this.value;debounceFilter()">
       <button class="btn-p" onclick="filterJournals()">Search</button>
     </div>
   </div>
@@ -360,7 +361,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-he
 <div id="tab-match" class="tc">
   <div class="panel">
     <h3>Manuscript-to-journal AI matching</h3>
-    <p>Paste your title and abstract. AcademiQ recommends best-fit journals from 5,000+ options.</p>
+    <p>Paste your title and abstract. AcademiQ recommends best-fit journals from 1,000,000+ options.</p>
     <textarea id="abstract-input" rows="6" placeholder="e.g. Title: Effects of lead on visual cortex neurons&#10;&#10;Abstract: This study investigates..."></textarea>
     <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">
       <button class="btn-p" style="background:var(--green);color:#fff" onclick="runMatch()">Find matching journals</button>
@@ -517,7 +518,7 @@ body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--t);min-he
     <button class="wc" onclick="closeWelcome()">&times;</button>
     <div class="wlogo"><div class="wlm"><svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="8" stroke="white" stroke-width="1.5"/><path d="M5 9h8M9 5v8" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg></div><span class="wlt">Academi<span>Q</span></span></div>
     <div class="wh">&#127891; Find your perfect journal!</div>
-    <div class="ws">5,000+ journals &middot; 26 disciplines &middot; 44+ countries &middot; 100% Free &#127759;</div>
+    <div class="ws">1,000,000+ journals &middot; 26 disciplines &middot; 44+ countries &middot; 100% Free &#127759;</div>
     <div style="background:#FFF8F0;border-radius:12px;padding:14px 16px;margin-bottom:14px;border:1px solid #fde8c0;text-align:center">
       <div style="font-size:22px;margin-bottom:6px">&#9749;</div>
       <div style="font-size:14px;font-weight:600;color:#3d2000;margin-bottom:4px">Buy us a coffee! &#128522;</div>
@@ -841,65 +842,287 @@ function updateChips(){
 }
 
 // ── FILTER & RENDER ───────────────────────────────────────────────
-let _ft=null;
-function debounceFilter(){clearTimeout(_ft);_ft=setTimeout(filterJournals,300);}
-function filterJournals(){
-  const q=(document.getElementById('search-main').value||'').toLowerCase();
-  const catIdx=catFilter?_CATS.indexOf(catFilter):-1;
-  const fieldIdx=fieldFilter?_FIELDS.indexOf(fieldFilter):-1;
-  const filtered=JOURNALS_DATA.filter(j=>{
-    const jf=_FIELDS[j.f]||'',jg=_CATS[j.g]||'',jsl=_SCOPE[j.s-1]||'international',jr=j.r===0?'africa':'intl';
-    const mq=!q||(j.t+' '+jf+' '+jg+' '+j.c+' '+j.p).toLowerCase().includes(q);
-    const mg=catIdx<0||j.g===catIdx;
-    const mf=fieldIdx<0||j.f===fieldIdx;
-    let ms=true;
-    switch(scopeFilter){
-      case 'all':ms=true;break;
-      case 'local':ms=userCountry?(j.n===userCountry):(jsl==='local');break;
-      case 'national':ms=userCountry?(j.n===userCountry&&jsl==='national'):(jsl==='national');break;
-      case 'regional':ms=jsl==='regional';break;
-      case 'africa':ms=jr==='africa';break;
-      case 'international':ms=jsl==='international';break;
-      case 'free':ms=j.a===0;break;
-      case 'doaj':ms=(j.x||[]).includes('D');break;
-      case 'scopus':ms=(j.x||[]).includes('S');break;
+
+// ── SUPABASE CONFIG ───────────────────────────────────────────────
+// Replace these with your Supabase project values after setup
+let SUPA_URL = localStorage.getItem('aq_supa_url') || 'YOUR_SUPABASE_URL';
+let SUPA_KEY = localStorage.getItem('aq_supa_key') || 'YOUR_SUPABASE_ANON_KEY';
+
+// Check if Supabase is configured
+function supaConfigured() {
+  return SUPA_URL !== 'YOUR_SUPABASE_URL' && SUPA_KEY !== 'YOUR_SUPABASE_ANON_KEY';
+}
+
+// ── SUPABASE QUERY ────────────────────────────────────────────────
+async function supaQuery(params) {
+  const url = new URL(SUPA_URL + '/rest/v1/journals');
+  
+  // Select fields
+  url.searchParams.set('select', 'id,title,publisher,country,region,scope_level,field,category,apc,indexing,credibility,last_issue,accepting,national_for');
+  
+  // Pagination
+  const limit = 24;
+  const offset = (curPage - 1) * limit;
+  url.searchParams.set('limit', limit);
+  url.searchParams.set('offset', offset);
+  url.searchParams.set('order', 'id.asc');
+
+  // Filters
+  if (params.category) url.searchParams.set('category', `eq.${params.category}`);
+  if (params.field)    url.searchParams.set('field', `eq.${params.field}`);
+  if (params.country)  url.searchParams.set('national_for', `eq.${params.country}`);
+
+  switch (params.scope) {
+    case 'local':    url.searchParams.set('scope_level', 'eq.1'); break;
+    case 'national': url.searchParams.set('scope_level', 'eq.1'); break;
+    case 'regional': url.searchParams.set('scope_level', 'eq.2'); break;
+    case 'africa':   url.searchParams.set('region', 'eq.a'); break;
+    case 'international': url.searchParams.set('scope_level', 'eq.3'); break;
+    case 'free':     url.searchParams.set('apc', 'eq.0'); break;
+    case 'doaj':     url.searchParams.set('indexing', 'like.*DOAJ*'); break;
+    case 'scopus':   url.searchParams.set('indexing', 'like.*Scopus*'); break;
+  }
+
+  // Text search on title
+  if (params.q) {
+    url.searchParams.set('title', `ilike.*${params.q}*`);
+  }
+
+  const resp = await fetch(url.toString(), {
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Prefer': 'count=exact'
     }
-    return mq&&mg&&mf&&ms;
   });
-  curList=filtered;curPage=1;renderJournals();
+
+  if (!resp.ok) throw new Error('Supabase error: ' + resp.status);
+  
+  const total = parseInt(resp.headers.get('content-range')?.split('/')[1] || '0');
+  const data = await resp.json();
+  return { data, total };
 }
-function renderJournals(){
-  document.getElementById('st-total').textContent=curList.length.toLocaleString();
-  document.getElementById('st-local').textContent=curList.filter(j=>j.s<=2).length.toLocaleString();
-  document.getElementById('st-reg').textContent=curList.filter(j=>j.s===3).length.toLocaleString();
-  document.getElementById('st-intl').textContent=curList.filter(j=>j.s===4).length.toLocaleString();
-  const el=document.getElementById('journal-list');
-  if(!curList.length){el.innerHTML='<div class="empty">No journals found. Try a different search, category, or filter.</div>';return;}
-  const tp=Math.ceil(curList.length/PS);
-  const start=(curPage-1)*PS;
-  const page=curList.slice(start,start+PS);
-  el.innerHTML=page.map(j=>cardHTML(expand(j))).join('')+pagHTML(tp);
+
+function supaExpandRow(j) {
+  // Decode short index codes: S=Scopus,D=DOAJ,J=AJOL,P=PubMed,W=Web of Science
+  const IDX = {S:'Scopus',D:'DOAJ',J:'AJOL',P:'PubMed',W:'Web of Science'};
+  const idxList = j.indexing ? j.indexing.split(',').map(x=>IDX[x.trim()]||x.trim()).filter(Boolean) : [];
+  // Decode region and scope
+  const region = j.region === 'a' ? 'africa' : 'intl';
+  const scopeMap = {1:'local',2:'regional',3:'international'};
+  const scope_level = scopeMap[j.scope_level] || 'international';
+  const q = encodeURIComponent(j.title);
+  const submitMap = {
+    'Elsevier':'https://www.editorialmanager.com/choose-journal',
+    'Wiley':'https://authorservices.wiley.com/author-resources/Journal-Authors/submission/index.html',
+    'Springer Nature':'https://submission.springernature.com',
+    'Taylor & Francis':'https://mc.manuscriptcentral.com/tandf',
+    'SAGE Publications':'https://mc.manuscriptcentral.com/sage',
+    'Oxford University Press':'https://mc.manuscriptcentral.com/oup',
+    'Cambridge University Press':'https://mc.manuscriptcentral.com/cup',
+    'BMJ Publishing Group':'https://submit.bmj.com',
+    'Nature Publishing Group':'https://mts-nature.nature.com',
+    'BioMed Central':'https://submission.biomedcentral.com',
+    'Frontiers Media':'https://www.frontiersin.org/submission/submit',
+    'MDPI':'https://susy.mdpi.com',
+    'Hindawi':'https://mts.hindawi.com',
+    'Public Library of Science':'https://journals.plos.org/plosone/s/submit-now',
+    'IEEE':'https://ieeeauthorcenter.ieee.org/submit-and-manage-your-article/',
+    'AJOL':'https://www.ajol.info/index.php/index/submissions',
+    'Academic Journals':'https://academicjournals.org/submission',
+  };
+  return {
+    id: j.id,
+    title: j.title,
+    publisher: j.publisher,
+    country: j.country,
+    region,
+    scope_level,
+    field: j.field,
+    category: j.category,
+    apc: j.apc || 0,
+    indexing: idxList,
+    credibility: j.credibility || 70,
+    lastIssue: j.last_issue || '',
+    accepting: j.accepting === 1 || j.accepting === true,
+    waiver: false,
+    nationalFor: j.national_for || '',
+    scope: (j.field||'') + ' research in ' + (j.category||'').split('&')[0].trim(),
+    website: 'https://scholar.google.com/scholar?q=' + q,
+    submitUrl: submitMap[j.publisher] || 'https://www.ajol.info/index.php/index/submissions',
+    reviewWeeks: '8-14 weeks',
+    acceptRate: '35%',
+  };
 }
-function pagHTML(tp){
-  if(tp<=1)return'';
-  const cp=curPage;let b='<div class="pag">';
-  b+=`<button class="pb" onclick="goPage(${Math.max(1,cp-1)})" ${cp===1?'disabled':''}>&#8592;</button>`;
-  let s=Math.max(1,cp-2),e=Math.min(tp,cp+2);
-  if(s>1)b+=`<button class="pb" onclick="goPage(1)">1</button>${s>2?'<span class="pe">...</span>':''}`;
-  for(let p=s;p<=e;p++)b+=`<button class="pb ${p===cp?'active':''}" onclick="goPage(${p})">${p}</button>`;
-  if(e<tp)b+=`${e<tp-1?'<span class="pe">...</span>':''}<button class="pb" onclick="goPage(${tp})">${tp}</button>`;
-  b+=`<button class="pb" onclick="goPage(${Math.min(tp,cp+1)})" ${cp===tp?'disabled':''}>&#8594;</button>`;
-  b+=`<span class="pi">Page ${cp}/${tp} &middot; ${curList.length.toLocaleString()} journals</span></div>`;
+
+// ── DEBOUNCE & FILTER ─────────────────────────────────────────────
+let _ft = null;
+function debounceFilter() { clearTimeout(_ft); _ft = setTimeout(filterJournals, 400); }
+
+async function filterJournals() {
+  if (!supaConfigured()) {
+    // Fallback to local 5000 journals
+    filterLocal();
+    return;
+  }
+
+  const q = (document.getElementById('search-main').value || '').trim();
+  const el = document.getElementById('journal-list');
+  el.innerHTML = '<div class="empty"><span class="spin"></span>Searching 1,000,000 journals...</div>';
+
+  try {
+    const catIdx = catFilter ? _CATS.indexOf(catFilter) : -1;
+    const fieldIdx = fieldFilter ? _FIELDS.indexOf(fieldFilter) : -1;
+
+    const { data, total } = await supaQuery({
+      q,
+      scope: scopeFilter,
+      category: catFilter || null,
+      field: fieldFilter || null,
+      country: (scopeFilter === 'local' || scopeFilter === 'national') ? userCountry : null,
+    });
+
+    totalSupaResults = total;
+    const journals = data.map(supaExpandRow);
+    renderSupaJournals(journals, total);
+
+    // Update stats
+    document.getElementById('st-total').textContent = total.toLocaleString();
+
+  } catch(err) {
+    console.error('Supabase error:', err);
+    el.innerHTML = `<div class="empty" style="color:#c0392b">
+      &#9888; Could not reach Supabase.<br>
+      <small style="display:block;margin-top:8px;color:var(--t3)">Check your Supabase URL and API key in Settings &#9881;</small>
+      <button class="btn-sm" style="margin-top:12px" onclick="openSupaSettings()">&#9881; Configure Supabase</button>
+    </div>`;
+    // Fallback
+    filterLocal();
+  }
+}
+
+let totalSupaResults = 0;
+
+function renderSupaJournals(journals, total) {
+  const el = document.getElementById('journal-list');
+  if (!journals.length) {
+    el.innerHTML = '<div class="empty">No journals found. Try different keywords or filters.</div>';
+    document.getElementById('st-total').textContent = '0';
+    return;
+  }
+
+  const limit = 24;
+  const totalPages = Math.ceil(total / limit);
+
+  el.innerHTML = journals.map(j => cardHTML(j)).join('') + supaPagHTML(totalPages, total);
+
+  // Update stats display
+  document.getElementById('st-total').textContent = total.toLocaleString();
+  document.getElementById('st-local').textContent = journals.filter(j=>j.scope_level==='local'||j.scope_level==='national').length;
+  document.getElementById('st-reg').textContent = journals.filter(j=>j.scope_level==='regional').length;
+  document.getElementById('st-intl').textContent = journals.filter(j=>j.scope_level==='international').length;
+}
+
+function supaPagHTML(tp, total) {
+  if (tp <= 1) return '';
+  const cp = curPage;
+  let b = '<div class="pag">';
+  b += `<button class="pb" onclick="goPage(${Math.max(1,cp-1)})" ${cp===1?'disabled':''}>&#8592;</button>`;
+  let s = Math.max(1, cp-2), e = Math.min(tp, cp+2);
+  if (s > 1) b += `<button class="pb" onclick="goPage(1)">1</button>${s>2?'<span class="pe">...</span>':''}`;
+  for (let p = s; p <= e; p++) b += `<button class="pb ${p===cp?'active':''}" onclick="goPage(${p})">${p}</button>`;
+  if (e < tp) b += `${e<tp-1?'<span class="pe">...</span>':''}<button class="pb" onclick="goPage(${tp})">${tp}</button>`;
+  b += `<button class="pb" onclick="goPage(${Math.min(tp,cp+1)})" ${cp===tp?'disabled':''}>&#8594;</button>`;
+  b += `<span class="pi">Page ${cp}/${tp.toLocaleString()} &middot; ${total.toLocaleString()} journals</span></div>`;
   return b;
 }
-function goPage(p){curPage=p;renderJournals();document.getElementById('journal-list').scrollIntoView({behavior:'smooth',block:'start'});}
 
-function scopeBg(j){
-  if(j.scope_level==='local')return'<span class="bg bl">&#127968; Local</span>';
-  if(j.scope_level==='national')return`<span class="bg bn">&#127963; National${j.nationalFor?' ('+j.nationalFor+')':''}</span>`;
-  if(j.scope_level==='regional')return'<span class="bg br">&#127758; Regional</span>';
-  return'<span class="bg bi">&#127757; International</span>';
+function goPage(p) {
+  curPage = p;
+  filterJournals();
+  document.getElementById('journal-list').scrollIntoView({behavior:'smooth', block:'start'});
 }
+
+// Local fallback filter (uses embedded 5000 journals)
+function filterLocal() {
+  const q = (document.getElementById('search-main').value || '').toLowerCase();
+  const catIdx = catFilter ? _CATS.indexOf(catFilter) : -1;
+  const fieldIdx = fieldFilter ? _FIELDS.indexOf(fieldFilter) : -1;
+  const filtered = JOURNALS_DATA.filter(j => {
+    const jf=_FIELDS[j.f]||'', jg=_CATS[j.g]||'', jsl=_SCOPE[j.s-1]||'international', jr=j.r===0?'africa':'intl';
+    const mq = !q || (j.t+' '+jf+' '+jg+' '+j.c+' '+j.p).toLowerCase().includes(q);
+    const mg = catIdx < 0 || j.g === catIdx;
+    const mf = fieldIdx < 0 || j.f === fieldIdx;
+    let ms = true;
+    switch(scopeFilter) {
+      case 'all': ms=true; break;
+      case 'local': ms=userCountry?(j.n===userCountry):(jsl==='local'); break;
+      case 'national': ms=userCountry?(j.n===userCountry&&jsl==='national'):(jsl==='national'); break;
+      case 'regional': ms=jsl==='regional'; break;
+      case 'africa': ms=jr==='africa'; break;
+      case 'international': ms=jsl==='international'; break;
+      case 'free': ms=j.a===0; break;
+      case 'doaj': ms=(j.x||[]).includes('D'); break;
+      case 'scopus': ms=(j.x||[]).includes('S'); break;
+    }
+    return mq && mg && mf && ms;
+  });
+  curList = filtered; curPage = 1;
+  renderLocal();
+}
+
+function renderLocal() {
+  document.getElementById('st-total').textContent = curList.length.toLocaleString();
+  document.getElementById('st-local').textContent = curList.filter(j=>j.s<=2).length.toLocaleString();
+  document.getElementById('st-reg').textContent = curList.filter(j=>j.s===3).length.toLocaleString();
+  document.getElementById('st-intl').textContent = curList.filter(j=>j.s===4).length.toLocaleString();
+  const el = document.getElementById('journal-list');
+  if (!curList.length) { el.innerHTML = '<div class="empty">No journals found.</div>'; return; }
+  const tp = Math.ceil(curList.length / PS);
+  const start = (curPage - 1) * PS;
+  el.innerHTML = curList.slice(start, start+PS).map(j => cardHTML(expand(j))).join('') + pagHTML(tp);
+}
+
+// ── SUPABASE SETTINGS MODAL ───────────────────────────────────────
+function openSupaSettings() {
+  const existing = document.getElementById('supa-modal');
+  if (existing) { existing.classList.add('open'); return; }
+  const div = document.createElement('div');
+  div.className = 'mo open'; div.id = 'supa-modal';
+  div.innerHTML = `<div class="modal" style="max-width:480px">
+    <button class="mc" onclick="document.getElementById('supa-modal').classList.remove('open')">&times;</button>
+    <h2>&#9881; Supabase Configuration</h2>
+    <p class="sub">Connect AcademiQ to your Supabase database for 1,000,000 journals.</p>
+    <div class="fg"><label>Supabase Project URL</label>
+      <input type="text" id="supa-url-input" placeholder="https://xxxx.supabase.co" value="${SUPA_URL !== 'YOUR_SUPABASE_URL' ? SUPA_URL : ''}">
+    </div>
+    <div class="fg"><label>Supabase Anon Key</label>
+      <input type="text" id="supa-key-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." value="${SUPA_KEY !== 'YOUR_SUPABASE_ANON_KEY' ? SUPA_KEY : ''}">
+    </div>
+    <div style="background:var(--gl);border-radius:var(--r);padding:12px 14px;font-size:12px;color:var(--gd);margin-bottom:16px;line-height:1.6">
+      <strong>How to get these values:</strong><br>
+      1. Go to <a href="https://supabase.com" target="_blank" style="color:var(--green)">supabase.com</a> → Your project<br>
+      2. Settings → API<br>
+      3. Copy "Project URL" and "anon public" key
+    </div>
+    <button class="bf2" style="background:var(--green);color:#fff" onclick="saveSupaConfig()">Save & Connect</button>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+function saveSupaConfig() {
+  const url = document.getElementById('supa-url-input').value.trim();
+  const key = document.getElementById('supa-key-input').value.trim();
+  if (!url || !key) { toast('Please fill in both fields'); return; }
+  SUPA_URL = url; SUPA_KEY = key;
+  localStorage.setItem('aq_supa_url', url);
+  localStorage.setItem('aq_supa_key', key);
+  document.getElementById('supa-modal').classList.remove('open');
+  toast('Supabase connected! Loading 1,000,000 journals... ✓');
+  curPage = 1;
+  filterJournals();
+}
+
 function jOpen(el,type){
   const url=type==='s'?el.getAttribute('data-s'):el.getAttribute('data-w');
   if(url)window.open(url,'_blank');
@@ -1019,7 +1242,7 @@ function runMatch(){
   const text=(document.getElementById('abstract-input').value||'').trim();
   if(!text){document.getElementById('match-results').innerHTML='<div class="empty">Please paste your abstract.</div>';return;}
   matchRunning=true;
-  document.getElementById('match-results').innerHTML='<div style="padding:20px 0;color:var(--t3);font-size:14px"><span class="spin"></span>Matching against 5,000+ journals...</div>';
+  document.getElementById('match-results').innerHTML='<div style="padding:20px 0;color:var(--t3);font-size:14px"><span class="spin"></span>Matching against 1,000,000+ journals...</div>';
   setTimeout(()=>{
     matchRunning=false;
     const lt=text.toLowerCase();
