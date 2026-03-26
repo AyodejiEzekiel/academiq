@@ -1,975 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>AcademiQ — 1 Million Journals</title>
-<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;background:#F7F4EF;color:#1A1A1A;min-height:100vh}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AcademiQ — Academic Discovery</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #1D9E75; --gl: #E1F5EE; --gd: #0F6E56; --gm: #9FE1CB;
+            --amber: #f5a623; --bg: #F4F2EE; --s: #fff; --t: #1a1a18; --t2: #6b6b67;
+            --r: 10px; --sh: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: "DM Sans", sans-serif; background: var(--bg); color: var(--t); line-height: 1.6; }
+        
+        /* Layout */
+        .topbar { position: fixed; top: 0; width: 100%; height: 60px; background: var(--s); display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid rgba(0,0,0,0.1); z-index: 100; justify-content: space-between; }
+        .logo { font-family: "DM Serif Display", serif; font-size: 22px; cursor: pointer; }
+        .logo span { color: var(--green); }
+        .tb-r { display: flex; gap: 15px; align-items: center; }
 
-/* ── CONFIG BANNER ── */
-#cfg-banner{background:#FEF0D8;border-bottom:1px solid #F5D89A;padding:10px 24px;display:flex;align-items:center;gap:12px;font-size:12px;color:#7A4A0A}
-#cfg-banner.hidden{display:none}
-#cfg-banner a{color:#1A5C3A;font-weight:600;text-decoration:underline;cursor:pointer}
-.cfg-inputs{display:flex;gap:8px;flex:1;flex-wrap:wrap}
-.cfg-in{flex:1;min-width:200px;padding:5px 10px;border-radius:6px;border:1px solid #F5D89A;background:#FFFDF7;font-size:12px;font-family:inherit;outline:none}
-.cfg-btn{padding:5px 14px;background:#0D2B1F;color:#E8DFC8;border:none;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
-
-/* ── HEADER ── */
-.hdr{background:#0D2B1F;padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
-.logo{font-family:'Lora',serif;font-size:19px;color:#E8DFC8}.logo b{color:#6FCF97}
-.logo small{font-size:10px;color:#9BB5A8;font-family:'DM Sans',sans-serif;font-weight:400;margin-left:5px}
-.hdr-right{display:flex;align-items:center;gap:10px}
-.nav{display:flex;gap:3px}
-.nb{background:none;border:none;color:#9BB5A8;font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 12px;border-radius:18px;cursor:pointer;transition:all .15s}
-.nb:hover{background:rgba(255,255,255,.08);color:#E8DFC8}.nb.on{background:#1A5C3A;color:#A8E6C1;font-weight:600}
-.bx{font-size:9px;background:#2D7A4F;color:#A8E6C1;padding:1px 5px;border-radius:8px;margin-left:3px}
-.user-pill{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.08);padding:4px 12px;border-radius:16px;cursor:pointer;transition:background .15s}
-.user-pill:hover{background:rgba(255,255,255,.14)}
-.user-avatar{width:22px;height:22px;border-radius:50%;background:#1A5C3A;display:flex;align-items:center;justify-content:center;font-size:10px;color:#A8E6C1;font-weight:700}
-.user-name{font-size:12px;color:#E8DFC8}
-.auth-btn{padding:5px 14px;border-radius:14px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s}
-.auth-btn.signin{background:transparent;border:1px solid rgba(255,255,255,.25);color:#E8DFC8}
-.auth-btn.signin:hover{background:rgba(255,255,255,.1)}
-.auth-btn.signup{background:#1A5C3A;color:#A8E6C1;font-weight:600}
-.auth-btn.signup:hover{background:#22734A}
-
-/* ── LAYOUT ── */
-.bdy{display:flex;min-height:calc(100vh - 54px)}
-.sb{width:210px;min-width:210px;background:#EDE8DF;border-right:1px solid #D5CCBB;padding:18px 15px;overflow-y:auto;position:sticky;top:54px;height:calc(100vh - 54px)}
-.st{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#8A7E6E;margin-bottom:8px}
-.fg{margin-bottom:20px}
-.fl{display:flex;align-items:center;gap:7px;font-size:12px;color:#3A3328;cursor:pointer;padding:3px 0}
-.fl input{accent-color:#1A5C3A;cursor:pointer}.fl:hover{color:#0D2B1F}
-.fsel{font-size:11px;border:1px solid #C9BFA9;border-radius:5px;padding:4px 7px;background:#FDFAF6;color:#3A3328;outline:none;cursor:pointer;width:100%;font-family:inherit}
-.mn{flex:1;padding:18px 22px;overflow-y:auto}
-
-/* ── SEARCH ── */
-.sbar{display:flex;gap:8px;margin-bottom:13px}
-.si{flex:1;padding:9px 14px;border-radius:8px;border:1.5px solid #C9BFA9;background:#FDFAF6;font-size:13px;outline:none;font-family:inherit;transition:border-color .15s}
-.si:focus{border-color:#1A5C3A}
-.sbtn{padding:9px 16px;background:#0D2B1F;color:#E8DFC8;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
-.sbtn:hover{background:#1A5C3A}
-.meta{font-size:11px;color:#8A7E6E;margin-bottom:13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.chip{background:#0D2B1F;color:#A8E6C1;font-size:10px;font-weight:600;padding:2px 10px;border-radius:10px}
-.scanning{display:flex;align-items:center;gap:9px;padding:10px 14px;background:#EAF5EE;border-radius:8px;margin-bottom:13px;font-size:12px;color:#1A5C3A}
-.spin{width:14px;height:14px;border:2px solid #D4F0E2;border-top-color:#1A5C3A;border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
-@keyframes sp{to{transform:rotate(360deg)}}
-
-/* ── GRID + CARDS ── */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
-.card{background:#FDFAF6;border:1px solid #DDD6C8;border-radius:11px;padding:14px;cursor:pointer;transition:all .15s;position:relative}
-.card:hover{border-color:#1A5C3A;box-shadow:0 3px 12px rgba(13,43,31,.1);transform:translateY(-1px)}
-.save-btn{position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;font-size:16px;opacity:.4;transition:opacity .15s;line-height:1}
-.save-btn:hover,.save-btn.saved{opacity:1}
-.cn{font-family:'Lora',serif;font-size:13px;font-weight:500;color:#0D2B1F;line-height:1.38;margin-bottom:5px;padding-right:22px}
-.cp{font-size:10px;color:#8A7E6E;margin-bottom:7px}
-.tr{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-.tg{font-size:9px;padding:2px 7px;border-radius:9px;font-weight:600}
-.tf{background:#D4F0E2;color:#0D5C30}.tp{background:#FEF0D8;color:#7A4A0A}
-.ta{background:#E8F4FE;color:#0A4A7A}.ti{background:#EDE8FE;color:#3A1A7A}
-.tl{background:#FDE8F4;color:#7A0A4A}.tx{background:#F0F0F0;color:#4A4A4A}
-.cr{display:flex;align-items:center;gap:7px;font-size:10px;color:#6A6060}
-.cb{height:4px;border-radius:2px;background:#EDE8DF;flex:1}.cf{height:4px;border-radius:2px}
-.cm{display:flex;gap:10px;font-size:10px;color:#6A6060;border-top:1px solid #EDE8DF;padding-top:8px;margin-top:6px}
-.lm{width:100%;margin-top:15px;padding:10px;background:#EDE8DF;border:1.5px solid #C9BFA9;border-radius:9px;font-size:12px;color:#3A3328;cursor:pointer;font-family:inherit}
-.lm:hover{background:#D5CCBB}
-
-/* ── MODAL ── */
-.ov{position:fixed;inset:0;background:rgba(13,43,31,.55);z-index:200;display:none;align-items:center;justify-content:center;padding:18px}
-.ov.open{display:flex}
-.mo{background:#FDFAF6;border-radius:14px;width:100%;max-width:530px;max-height:88vh;overflow-y:auto;padding:24px;position:relative}
-.mc{position:absolute;top:14px;right:14px;background:#EDE8DF;border:none;width:27px;height:27px;border-radius:50%;cursor:pointer;font-size:13px;color:#6A6060;display:flex;align-items:center;justify-content:center}
-.mt{font-family:'Lora',serif;font-size:18px;color:#0D2B1F;margin:7px 0 3px;line-height:1.3}
-.mp{font-size:12px;color:#8A7E6E;margin-bottom:14px}
-.ig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:13px 0}
-.ic{background:#EDE8DF;border-radius:7px;padding:9px 11px}
-.il{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:#8A7E6E;font-weight:700;margin-bottom:2px}
-.iv{font-size:13px;color:#0D2B1F;font-weight:600}
-.sbox{background:#EAF5EE;border-radius:8px;padding:12px;margin:10px 0;font-size:12px;color:#1A3A28;line-height:1.6}
-.slbl{font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:#2D7A4F;font-weight:700;margin-bottom:5px}
-a.mla{display:block;padding:10px;border-radius:8px;text-align:center;font-size:12px;font-weight:600;text-decoration:none;margin-top:5px;font-family:'DM Sans',sans-serif}
-a.mla.pr{background:#0D2B1F;color:#E8DFC8}
-a.mla.sc{background:#EDE8DF;color:#0D2B1F}
-.modal-save{width:100%;padding:9px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #1A5C3A;color:#1A5C3A;background:none;font-family:inherit;margin-top:5px;transition:all .15s}
-.modal-save:hover,.modal-save.saved{background:#D4F0E2;border-color:#1A5C3A}
-
-/* ── AUTH MODAL ── */
-.auth-ov{position:fixed;inset:0;background:rgba(13,43,31,.6);z-index:300;display:none;align-items:center;justify-content:center;padding:18px}
-.auth-ov.open{display:flex}
-.auth-mo{background:#FDFAF6;border-radius:14px;width:100%;max-width:400px;padding:32px;position:relative}
-.auth-title{font-family:'Lora',serif;font-size:22px;color:#0D2B1F;margin-bottom:6px}
-.auth-sub{font-size:12px;color:#8A7E6E;margin-bottom:22px}
-.auth-field{margin-bottom:14px}
-.auth-label{font-size:11px;color:#6A6060;margin-bottom:4px;display:block}
-.auth-input{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid #C9BFA9;background:#FDFAF6;font-size:13px;outline:none;font-family:inherit;transition:border-color .15s}
-.auth-input:focus{border-color:#1A5C3A}
-.auth-submit{width:100%;padding:11px;background:#0D2B1F;color:#E8DFC8;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px}
-.auth-submit:hover{background:#1A5C3A}
-.auth-toggle{font-size:12px;color:#8A7E6E;text-align:center;margin-top:14px}
-.auth-toggle a{color:#1A5C3A;cursor:pointer;font-weight:600;text-decoration:none}
-.auth-err{font-size:11px;color:#C0392B;margin-bottom:10px;display:none}
-.auth-ok{font-size:11px;color:#1A6B3C;margin-bottom:10px;display:none}
-
-/* ── AI MATCH ── */
-.aip{max-width:680px}
-.ata{font-family:'Lora',serif;font-size:21px;color:#0D2B1F;margin-bottom:5px}
-.ats{font-size:12px;color:#6A6060;margin-bottom:14px}
-.tx2{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid #C9BFA9;background:#FDFAF6;font-size:12px;resize:vertical;min-height:100px;outline:none;line-height:1.6;font-family:inherit;transition:border-color .15s}
-.tx2:focus{border-color:#1A5C3A}
-.fr{display:flex;gap:10px;margin:9px 0;flex-wrap:wrap}
-.sel{padding:7px 10px;border-radius:8px;border:1.5px solid #C9BFA9;background:#FDFAF6;font-size:12px;outline:none;cursor:pointer;flex:1;min-width:115px;font-family:inherit}
-.mb{width:100%;padding:12px;background:#0D2B1F;color:#E8DFC8;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;font-family:inherit}
-.mb:hover:not([disabled]){background:#1A5C3A}.mb[disabled]{opacity:.55;cursor:not-allowed}
-.ld{display:flex;align-items:center;gap:10px;padding:18px 0;font-size:12px;color:#8A7E6E}
-.ld .spin{width:24px;height:24px;border-width:3px}
-.rc{background:#FDFAF6;border:1px solid #DDD6C8;border-radius:11px;padding:14px 18px;margin-bottom:9px;display:flex;gap:13px;cursor:pointer;transition:border-color .15s}
-.rc:hover{border-color:#1A5C3A}
-.rk{font-family:'Lora',serif;font-size:24px;color:#C9BFA9;font-weight:400;min-width:28px;line-height:1.1}
-.rk.top{color:#D4A017}.rb{flex:1}
-.rtt{font-family:'Lora',serif;font-size:14px;font-weight:500;color:#0D2B1F;margin-bottom:2px}
-.rpb{font-size:11px;color:#8A7E6E;margin-bottom:7px}
-.rr{font-size:11px;color:#3A5A4A;background:#EAF5EE;padding:7px 11px;border-radius:5px;border-left:3px solid #6FCF97;line-height:1.5;margin-bottom:7px}
-.rsp{background:#D4F0E2;color:#0D5C30;font-size:10px;font-weight:700;padding:2px 9px;border-radius:9px}
-.rsp.md{background:#FEF0D8;color:#7A4A0A}
-.pg{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:13px}
-.pi{padding:5px 12px;border-radius:17px;font-size:11px;border:1.5px solid #C9BFA9;background:none;cursor:pointer;color:#3A3328;font-family:inherit}
-.pi:hover{border-color:#1A5C3A}
-.dv{height:1px;background:#DDD6C8;margin:13px 0}
-.err{color:#C0392B;font-size:11px;margin-bottom:7px}
-
-/* ── SAVED + HISTORY ── */
-.empty-state{text-align:center;padding:60px 20px;color:#8A7E6E}
-.empty-icon{font-size:32px;margin-bottom:10px}
-.history-card{background:#FDFAF6;border:1px solid #DDD6C8;border-radius:10px;padding:14px 16px;margin-bottom:10px}
-.history-meta{font-size:10px;color:#8A7E6E;margin-bottom:6px}
-.history-title{font-size:13px;font-weight:600;color:#0D2B1F;font-family:'Lora',serif;margin-bottom:4px}
-.history-abs{font-size:11px;color:#6A6060;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.history-matches{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
-
-/* ── ALERTS TAB ── */
-.alert-card{background:#FDFAF6;border:1px solid #DDD6C8;border-radius:11px;padding:12px 16px;margin-bottom:9px;display:flex;gap:12px;align-items:flex-start}
-.sub-btn{background:#0D2B1F;color:#E8DFC8;border:none;border-radius:5px;padding:4px 10px;font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
-.sub-btn:hover{background:#1A5C3A}
-.sub-btn.subbed{background:#D4F0E2;color:#0D5C30}
-
-/* ── DB STATUS BADGE ── */
-.db-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;padding:2px 8px;border-radius:8px}
-.db-badge.on{background:#D4F0E2;color:#0D5C30}
-.db-badge.off{background:#FEE8E8;color:#7A0A0A}
-.db-dot{width:6px;height:6px;border-radius:50%}
-.db-badge.on .db-dot{background:#1A6B3C}
-.db-badge.off .db-dot{background:#C0392B}
-</style>
+        /* Main Components */
+        .main { margin-top: 60px; padding: 30px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+        .hero { background: linear-gradient(135deg, #0d6b4f, var(--green)); color: #fff; padding: 40px; border-radius: 15px; margin-bottom: 25px; }
+        .hero h2 { font-family: "DM Serif Display", serif; font-size: 28px; margin-bottom: 10px; }
+        
+        /* Interactive Elements */
+        .panel { background: var(--s); padding: 25px; border-radius: var(--r); box-shadow: var(--sh); margin-bottom: 20px; border-left: 4px solid var(--green); }
+        .btn-p { background: var(--green); color: #fff; border: none; padding: 12px 24px; border-radius: var(--r); cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-p:hover { opacity: 0.9; transform: translateY(-1px); }
+        
+        /* Language & Alerts */
+        .lang-select { padding: 5px; border-radius: 5px; border: 1px solid #ddd; font-family: inherit; }
+        .alc { display: flex; align-items: center; gap: 10px; background: var(--gl); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 14px; color: var(--gd); }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; display: none; z-index: 200; }
+    </style>
 </head>
 <body>
 
-<!-- CONFIG BANNER -->
-<div id="cfg-banner">
-  ⚠️ <strong>Supabase not configured.</strong> Features like saved journals, AI match history, and alert subscriptions need your project credentials.
-  <div class="cfg-inputs">
-    <input class="cfg-in" id="cfg-url" placeholder="https://xxxx.supabase.co" />
-    <input class="cfg-in" id="cfg-key" placeholder="anon public key" />
-  </div>
-  <button class="cfg-btn" onclick="connectSupabase()">Connect</button>
-  <a onclick="showSetupGuide()">Setup guide ↗</a>
-</div>
+    <header class="topbar">
+        <div class="logo">Academi<span>Q</span></div>
+        <div class="tb-r">
+            <select class="lang-select" onchange="translateUI(this.value)">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="pt">Português</option>
+            </select>
+            <button class="btn-p" style="background:var(--amber)" data-i18n="btn_donate">Buy us a coffee</button>
+        </div>
+    </header>
 
-<!-- HEADER -->
-<div class="hdr">
-  <div class="logo">Academi<b>Q</b><small>· 1M journals</small></div>
-  <div class="hdr-right">
-    <div class="nav">
-      <button class="nb on" onclick="showTab('browse')">Discover<span class="bx">1M</span></button>
-      <button class="nb" onclick="showTab('match')">AI Match</button>
-      <button class="nb" onclick="showTab('alerts')">Alerts<span class="bx" id="alert-count">8</span></button>
-      <button class="nb" onclick="showTab('saved')" id="nb-saved">Saved<span class="bx" id="saved-count">0</span></button>
-      <button class="nb" onclick="showTab('history')" id="nb-history">History</button>
-    </div>
-    <div id="auth-area">
-      <button class="auth-btn signin" onclick="openAuth('signin')">Sign in</button>
-      <button class="auth-btn signup" onclick="openAuth('signup')">Sign up</button>
-    </div>
-  </div>
-</div>
+    <main class="main">
+        <section class="hero">
+            <h2 data-i18n="hero_title">Find journals for your research</h2>
+            <p data-i18n="hero_sub">Search 1,000,000+ journals across the African continent.</p>
+        </section>
 
-<!-- ══════════════════ BROWSE TAB ══════════════════ -->
-<div id="t-browse" class="bdy">
-  <div class="sb">
-    <div class="fg">
-      <div class="st">Region</div>
-      <label class="fl"><input type="radio" name="rgn" value="all" checked onchange="go()"> All (~1M)</label>
-      <label class="fl"><input type="radio" name="rgn" value="local" onchange="go()"> 🇳🇬 Nigeria (~200k)</label>
-      <label class="fl"><input type="radio" name="rgn" value="african" onchange="go()"> 🌍 African (~300k)</label>
-      <label class="fl"><input type="radio" name="rgn" value="intl" onchange="go()"> 🌐 International (~500k)</label>
-    </div>
-    <div class="fg">
-      <div class="st">APC</div>
-      <label class="fl"><input type="radio" name="apc" value="all" checked onchange="go()"> All journals</label>
-      <label class="fl"><input type="radio" name="apc" value="free" onchange="go()"> Free only</label>
-      <label class="fl"><input type="radio" name="apc" value="low" onchange="go()"> Low (≤$500)</label>
-    </div>
-    <div class="fg">
-      <div class="st">Indexing</div>
-      <label class="fl"><input type="checkbox" value="Scopus" onchange="go()"> Scopus</label>
-      <label class="fl"><input type="checkbox" value="PubMed" onchange="go()"> PubMed</label>
-      <label class="fl"><input type="checkbox" value="DOAJ" onchange="go()"> DOAJ</label>
-      <label class="fl"><input type="checkbox" value="AJOL" onchange="go()"> AJOL</label>
-      <label class="fl"><input type="checkbox" value="WoS" onchange="go()"> WoS</label>
-    </div>
-    <div class="fg">
-      <div class="st">Field</div>
-      <select class="fsel" id="f-sel" onchange="go()"></select>
-    </div>
-    <div class="fg">
-      <div class="st">Sort</div>
-      <select class="fsel" id="s-sel" onchange="resort()">
-        <option value="cred">Credibility ↓</option>
-        <option value="apc">APC: lowest first</option>
-        <option value="rev">Fastest review</option>
-        <option value="date">Most recent</option>
-      </select>
-    </div>
-    <div class="fg">
-      <div class="st">Database</div>
-      <div class="db-badge off" id="db-status"><div class="db-dot"></div><span id="db-label">Not connected</span></div>
-    </div>
-  </div>
-  <div class="mn">
-    <div class="sbar">
-      <input class="si" id="q" placeholder="Search by field (toxicology, ophthalmology, nutrition…)" oninput="debounce()">
-      <button class="sbtn" onclick="go()">Search</button>
-    </div>
-    <div id="meta" class="meta"></div>
-    <div id="grid" class="grid"></div>
-    <button class="lm" id="lm" style="display:none" onclick="pg++;render()">Load more</button>
-  </div>
-</div>
+        <section class="panel">
+            <h3 data-i18n="alert_h">🔔 Field Alerts</h3>
+            <p data-i18n="alert_p">Get notified when new Calls for Papers (CFP) are published in your field.</p>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <select id="alert-field" class="lang-select" style="flex:1">
+                    <option value="Agric">Agriculture</option>
+                    <option value="Med">Medicine</option>
+                    <option value="Tech">Technology</option>
+                </select>
+                <button class="btn-p" onclick="subscribeAlert()" data-i18n="btn_sub">Subscribe</button>
+            </div>
+            <div id="active-alerts"></div>
+        </section>
 
-<!-- ══════════════════ AI MATCH TAB ══════════════════ -->
-<div id="t-match" class="bdy" style="display:none">
-  <div class="mn">
-    <div class="aip">
-      <div class="ata">AI Journal Matcher</div>
-      <div class="ats">Paste your abstract. Claude recommends the best-fit journals — and saves your match history to Supabase.</div>
-      <div class="pg">
-        <button class="pi" onclick="loadSample()">📋 Load sample manuscript</button>
-        <button class="pi" onclick="clearMatch()">✕ Clear</button>
-      </div>
-      <input class="si" id="mt" placeholder="Manuscript title…" style="margin-bottom:8px;display:block">
-      <textarea class="tx2" id="ma" placeholder="Paste your abstract here…"></textarea>
-      <div class="fr">
-        <select class="sel" id="mf"></select>
-        <select class="sel" id="map">
-          <option value="all">Any APC</option>
-          <option value="free">Free only</option>
-          <option value="low">Low APC &lt;$500</option>
-        </select>
-        <select class="sel" id="mr">
-          <option value="all">All regions</option>
-          <option value="local">Nigerian only</option>
-          <option value="african">African only</option>
-          <option value="intl">International</option>
-        </select>
-      </div>
-      <div class="err" id="merr" style="display:none"></div>
-      <button class="mb" id="mbtn" onclick="doMatch()">Find matching journals →</button>
-      <div class="ld" id="mld" style="display:none">
-        <div class="spin" style="width:24px;height:24px;border-width:3px"></div>
-        Matching your manuscript against curated journals…
-      </div>
-      <div id="mres"></div>
-    </div>
-  </div>
-</div>
+        <div id="journal-results" class="panel" style="border-left-color: #ddd;">
+            <p data-i18n="results_empty">Search results will appear here...</p>
+        </div>
+    </main>
 
-<!-- ══════════════════ ALERTS TAB ══════════════════ -->
-<div id="t-alerts" class="bdy" style="display:none">
-  <div class="mn"><div id="alerts-content" style="max-width:640px"></div></div>
-</div>
+    <div id="toast" class="toast"></div>
 
-<!-- ══════════════════ SAVED TAB ══════════════════ -->
-<div id="t-saved" class="bdy" style="display:none">
-  <div class="mn">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div>
-        <div style="font-family:'Lora',serif;font-size:20px;color:#0D2B1F;margin-bottom:3px">Saved Journals</div>
-        <div style="font-size:12px;color:#8A7E6E">Your bookmarked journals — synced via Supabase</div>
-      </div>
-    </div>
-    <div id="saved-grid" class="grid"></div>
-  </div>
-</div>
+    <script>
+        // 1. DATA: Translations
+        const i18n = {
+            en: {
+                hero_title: "Find journals for your research",
+                hero_sub: "Search 1,000,000+ journals across the African continent.",
+                btn_donate: "Buy us a coffee",
+                alert_h: "🔔 Field Alerts",
+                alert_p: "Get notified of new Calls for Papers (CFP) in your field.",
+                btn_sub: "Subscribe",
+                results_empty: "Search results will appear here..."
+            },
+            fr: {
+                hero_title: "Trouvez des revues pour votre recherche",
+                hero_sub: "Recherchez plus d'un million de revues en Afrique.",
+                btn_donate: "Offrez-nous un café",
+                alert_h: "🔔 Alertes de domaine",
+                alert_p: "Soyez notifié des appels à contributions (CFP) dans votre domaine.",
+                btn_sub: "S'abonner",
+                results_empty: "Les résultats apparaîtront ici..."
+            }
+        };
 
-<!-- ══════════════════ HISTORY TAB ══════════════════ -->
-<div id="t-history" class="bdy" style="display:none">
-  <div class="mn">
-    <div style="font-family:'Lora',serif;font-size:20px;color:#0D2B1F;margin-bottom:4px">Match History</div>
-    <div style="font-size:12px;color:#8A7E6E;margin-bottom:18px">Your previous AI manuscript matches — stored in Supabase</div>
-    <div id="history-list"></div>
-  </div>
-</div>
+        // 2. LOGIC: Language Engine
+        function translateUI(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) el.innerText = i18n[lang][key];
+            });
+            localStorage.setItem('userLang', lang);
+        }
 
-<!-- ══════════════════ JOURNAL MODAL ══════════════════ -->
-<div class="ov" id="ov" onclick="if(event.target===this)closeModal()">
-  <div class="mo">
-    <button class="mc" onclick="closeModal()">✕</button>
-    <div class="tr" id="m-tags"></div>
-    <div class="mt" id="m-title"></div>
-    <div class="mp" id="m-pub"></div>
-    <div class="slbl">AI-Generated Scope Summary</div>
-    <div class="sbox" id="m-scope"></div>
-    <div class="ig" id="m-ig"></div>
-    <div class="il" style="font-size:9px;text-transform:uppercase;letter-spacing:.8px;color:#8A7E6E;font-weight:700;margin-bottom:5px">Research Fields</div>
-    <div class="tr" id="m-flds" style="margin-bottom:13px"></div>
-    <button class="modal-save" id="m-save-btn" onclick="toggleSaveFromModal()">🔖 Save journal</button>
-    <a class="mla pr" id="m-sub" href="#" target="_blank">Submit to this journal →</a>
-    <a class="mla sc" id="m-vis" href="#" target="_blank" style="margin-top:5px">Visit journal website</a>
-  </div>
-</div>
+        // 3. LOGIC: Alert System
+        function subscribeAlert() {
+            const field = document.getElementById('alert-field').value;
+            const alertBox = document.getElementById('active-alerts');
+            
+            // UI Feedback
+            const badge = document.createElement('div');
+            badge.className = 'alc';
+            badge.innerHTML = `<span>✓</span> Subscribed to <strong>${field}</strong> updates`;
+            alertBox.appendChild(badge);
+            
+            showToast(`Alert set for ${field}!`);
+        }
 
-<!-- ══════════════════ AUTH MODAL ══════════════════ -->
-<div class="auth-ov" id="auth-ov" onclick="if(event.target===this)closeAuth()">
-  <div class="auth-mo">
-    <button class="mc" onclick="closeAuth()">✕</button>
-    <div class="auth-title" id="auth-title">Sign in</div>
-    <div class="auth-sub" id="auth-sub">Access your saved journals and match history.</div>
-    <div class="auth-err" id="auth-err"></div>
-    <div class="auth-ok" id="auth-ok"></div>
-    <div class="auth-field">
-      <label class="auth-label">Email</label>
-      <input class="auth-input" id="auth-email" type="email" placeholder="you@university.edu.ng">
-    </div>
-    <div class="auth-field">
-      <label class="auth-label">Password</label>
-      <input class="auth-input" id="auth-pw" type="password" placeholder="••••••••">
-    </div>
-    <div class="auth-field" id="auth-name-field" style="display:none">
-      <label class="auth-label">Full name</label>
-      <input class="auth-input" id="auth-name" placeholder="Dr. Ayodeji Ezekiel">
-    </div>
-    <button class="auth-submit" id="auth-submit" onclick="doAuth()">Sign in</button>
-    <div class="auth-toggle">
-      <span id="auth-toggle-text">Don't have an account?</span>
-      <a id="auth-toggle-link" onclick="toggleAuthMode()">Sign up</a>
-    </div>
-  </div>
-</div>
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
 
-<!-- ══════════════════ SETUP GUIDE MODAL ══════════════════ -->
-<div class="ov" id="setup-ov" onclick="if(event.target===this)closeSetup()" style="z-index:400">
-  <div class="mo" style="max-width:580px">
-    <button class="mc" onclick="closeSetup()">✕</button>
-    <div style="font-family:'Lora',serif;font-size:18px;color:#0D2B1F;margin-bottom:4px">Supabase Setup Guide</div>
-    <div style="font-size:12px;color:#8A7E6E;margin-bottom:16px">Follow these steps to connect your Supabase project in 5 minutes.</div>
-    <div style="font-size:13px;color:#1A1A1A;line-height:1.8">
-      <p style="margin-bottom:10px"><strong>1.</strong> Go to <a href="https://supabase.com" target="_blank" style="color:#1A5C3A">supabase.com</a> → New project.</p>
-      <p style="margin-bottom:10px"><strong>2.</strong> In <strong>Settings → API</strong>, copy your <em>Project URL</em> and <em>anon public key</em>.</p>
-      <p style="margin-bottom:10px"><strong>3.</strong> Run this SQL in the <strong>SQL Editor</strong> to create the tables:</p>
-      <pre id="sql-block" style="background:#EDE8DF;border-radius:8px;padding:14px;font-size:11px;line-height:1.7;overflow-x:auto;white-space:pre-wrap;color:#1A1A1A;margin-bottom:10px"></pre>
-      <p style="margin-bottom:10px"><strong>4.</strong> In <strong>Authentication → Providers</strong>, enable <strong>Email</strong>.</p>
-      <p><strong>5.</strong> Paste the URL and key into the banner at the top of AcademiQ and click <strong>Connect</strong>.</p>
-    </div>
-    <button class="auth-submit" style="margin-top:16px" onclick="copySQL()">📋 Copy SQL</button>
-  </div>
-</div>
-
-<script>
-// ══════════════════════════════════════
-//  DATA ARRAYS
-// ══════════════════════════════════════
-const FLDS=["Medicine","Biology","Chemistry","Physics","Engineering","Agriculture","Pharmacy","Nursing","Public Health","Dentistry","Veterinary Science","Environmental Science","Biochemistry","Genetics","Microbiology","Immunology","Neuroscience","Cardiology","Oncology","Pediatrics","Ophthalmology","Dermatology","Radiology","Surgery","Epidemiology","Nutrition","Toxicology","Pharmacology","Physiology","Anatomy","Pathology","Parasitology","Virology","Bacteriology","Zoology","Botany","Ecology","Marine Biology","Cell Biology","Molecular Biology","Biotechnology","Biophysics","Statistics","Mathematics","Computer Science","Electrical Engineering","Mechanical Engineering","Civil Engineering","Chemical Engineering","Food Science","Soil Science","Agronomy","Horticulture","Forestry","Fisheries","Animal Science","Crop Science","Tropical Medicine","Infectious Disease","Mental Health","Occupational Health"];
-const PFX=["Journal of","International Journal of","African Journal of","Nigerian Journal of","West African Journal of","East African Journal of","Southern African Journal of","Pan-African Journal of","Annals of","Archives of","Advances in","Research in","Frontiers in","Bulletin of","Transactions on","Reports in","Current Issues in","Open Access Journal of","Global Journal of","European Journal of","American Journal of","Asian Journal of","Tropical Journal of","Journal of Applied","Journal of Clinical","Journal of Experimental","Journal of Theoretical","Letters in","Perspectives on","Review of"];
-const QL=["","","","","","Applied ","Clinical ","Experimental ","Theoretical ","Molecular ","Cellular ","Comparative ","Computational ","Integrative ","Translational ","Functional "];
-const PL=["University of Lagos Press","Ahmadu Bello University Press","University of Ibadan Publishing","University of Nigeria Press","Obafemi Awolowo University Press","University of Port Harcourt Press","Nigerian Medical Association","West African College of Physicians","Nigerian Academy of Science","Bayero University Press","University of Benin Press","Federal Univ. of Technology Press","University of Ilorin Press","Nnamdi Azikiwe University Press","University of Calabar Press","Ladoke Akintola University Press","Michael Okpara University Press","Rivers State University Press","Kogi State University Press","Usmanu Danfodiyo University Press"];
-const PA=["African Academy of Sciences","AJOL Publishing","Makerere University Press","University of Nairobi Press","Stellenbosch University Press","University of Cape Town Press","Addis Ababa University Press","University of Ghana Press","African Journals Online","CODESRIA Publishing","East African Medical Publishers","South African Medical Association","Kenyan Academy of Sciences","Ethiopian Medical Publishers","Ghanaian Academy of Sciences","Tanzanian Research Consortium","Zimbabwe Academic Publishers","Ugandan Medical Association","Pan-African Research Network","Nairobi Univ. Medical Press"];
-const PI=["Elsevier","Springer Nature","Wiley","MDPI","Public Library of Science","Taylor & Francis","Sage Publications","Oxford University Press","Cambridge University Press","BioMed Central","Frontiers Media","Hindawi","De Gruyter","Informa Healthcare","Mary Ann Liebert","Thieme Verlag","Karger Publishers","Wolters Kluwer","IOP Publishing","American Chemical Society","Nature Publishing Group","Lippincott Williams & Wilkins","Annual Reviews","S. Karger AG","Academic Press"];
-const CL=["Nigeria"];
-const CA=["Kenya","Uganda","Ghana","South Africa","Ethiopia","Tanzania","Rwanda","Cameroon","Senegal","Zimbabwe","Botswana","Zambia","Algeria","Morocco","Egypt","Mozambique","Malawi","Angola","Namibia","Burkina Faso"];
-const CI=["USA","UK","Netherlands","Switzerland","Germany","France","Japan","Canada","Australia","Sweden","Denmark","Norway","Belgium","Italy","Spain","South Korea","China","India","Brazil","Singapore"];
-const FLAGS={"Nigeria":"🇳🇬","Kenya":"🇰🇪","Uganda":"🇺🇬","Ghana":"🇬🇭","South Africa":"🇿🇦","Ethiopia":"🇪🇹","Tanzania":"🇹🇿","Rwanda":"🇷🇼","Cameroon":"🇨🇲","Senegal":"🇸🇳","Zimbabwe":"🇿🇼","Botswana":"🇧🇼","Zambia":"🇿🇲","Algeria":"🇩🇿","Morocco":"🇲🇦","Egypt":"🇪🇬","USA":"🇺🇸","UK":"🇬🇧","Netherlands":"🇳🇱","Switzerland":"🇨🇭","Germany":"🇩🇪","France":"🇫🇷","Japan":"🇯🇵","Canada":"🇨🇦","Australia":"🇦🇺","Sweden":"🇸🇪","Denmark":"🇩🇰","Norway":"🇳🇴","China":"🇨🇳","India":"🇮🇳","Brazil":"🇧🇷","South Korea":"🇰🇷","Singapore":"🇸🇬"};
-const AM=[0,200,500,1200,2800],RM=[5,9,15,22];
-const IDXN=["Scopus","PubMed","DOAJ","AJOL","WoS"];
-const RN=["local","african","intl"];
-
-// ══════════════════════════════════════
-//  SUPABASE SETUP SQL
-// ══════════════════════════════════════
-const SETUP_SQL=`-- Run this in your Supabase SQL Editor
--- Table: saved journals
-create table if not exists public.saved_journals (
-  id          uuid default gen_random_uuid() primary key,
-  user_id     uuid references auth.users on delete cascade not null,
-  journal_id  integer not null,
-  journal_data jsonb not null,
-  saved_at    timestamptz default now()
-);
-alter table public.saved_journals enable row level security;
-create policy "Users see own saved journals"
-  on public.saved_journals for all
-  using (auth.uid() = user_id);
-
--- Table: match history
-create table if not exists public.match_history (
-  id            uuid default gen_random_uuid() primary key,
-  user_id       uuid references auth.users on delete cascade not null,
-  title         text,
-  abstract      text,
-  field         text,
-  apc_pref      text,
-  region_pref   text,
-  results       jsonb,
-  created_at    timestamptz default now()
-);
-alter table public.match_history enable row level security;
-create policy "Users see own match history"
-  on public.match_history for all
-  using (auth.uid() = user_id);
-
--- Table: alert subscriptions
-create table if not exists public.alert_subscriptions (
-  id         uuid default gen_random_uuid() primary key,
-  user_id    uuid references auth.users on delete cascade not null,
-  alert_key  text not null,
-  alert_meta jsonb,
-  subbed_at  timestamptz default now(),
-  unique(user_id, alert_key)
-);
-alter table public.alert_subscriptions enable row level security;
-create policy "Users manage own subscriptions"
-  on public.alert_subscriptions for all
-  using (auth.uid() = user_id);`;
-document.getElementById('sql-block').textContent=SETUP_SQL;
-
-// ══════════════════════════════════════
-//  SUPABASE CLIENT
-// ══════════════════════════════════════
-let sb=null, currentUser=null, savedIds=new Set(), subbedKeys=new Set();
-
-function connectSupabase(){
-  const url=document.getElementById('cfg-url').value.trim();
-  const key=document.getElementById('cfg-key').value.trim();
-  if(!url||!key){alert('Please enter both URL and anon key.');return;}
-  try{
-    sb=supabase.createClient(url,key);
-    localStorage.setItem('aq_sb_url',url);
-    localStorage.setItem('aq_sb_key',key);
-    afterConnect();
-  }catch(e){alert('Connection failed: '+e.message);}
-}
-
-function afterConnect(){
-  document.getElementById('cfg-banner').classList.add('hidden');
-  document.getElementById('db-status').className='db-badge on';
-  document.getElementById('db-label').textContent='Connected';
-  sb.auth.getSession().then(({data})=>{
-    if(data.session){setUser(data.session.user);}
-  });
-  sb.auth.onAuthStateChange((_,session)=>{
-    if(session){setUser(session.user);}else{clearUser();}
-  });
-}
-
-async function setUser(user){
-  currentUser=user;
-  const initials=(user.user_metadata?.full_name||user.email||'U').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('auth-area').innerHTML=`
-    <div class="user-pill" onclick="signOut()">
-      <div class="user-avatar">${initials}</div>
-      <span class="user-name">${user.user_metadata?.full_name||user.email.split('@')[0]}</span>
-      <span style="font-size:10px;color:#9BB5A8">Sign out</span>
-    </div>`;
-  await loadSavedIds();
-  await loadSubbedKeys();
-  refreshSavedTab();
-  renderAlertsWithSubs();
-}
-
-function clearUser(){
-  currentUser=null;savedIds=new Set();subbedKeys=new Set();
-  document.getElementById('auth-area').innerHTML=`
-    <button class="auth-btn signin" onclick="openAuth('signin')">Sign in</button>
-    <button class="auth-btn signup" onclick="openAuth('signup')">Sign up</button>`;
-  document.getElementById('saved-count').textContent='0';
-}
-
-async function loadSavedIds(){
-  if(!sb||!currentUser)return;
-  const{data}=await sb.from('saved_journals').select('journal_id').eq('user_id',currentUser.id);
-  savedIds=new Set((data||[]).map(r=>r.journal_id));
-  document.getElementById('saved-count').textContent=savedIds.size;
-}
-
-async function loadSubbedKeys(){
-  if(!sb||!currentUser)return;
-  const{data}=await sb.from('alert_subscriptions').select('alert_key').eq('user_id',currentUser.id);
-  subbedKeys=new Set((data||[]).map(r=>r.alert_key));
-}
-
-async function signOut(){
-  if(sb)await sb.auth.signOut();
-  clearUser();
-}
-
-// ══════════════════════════════════════
-//  AUTH MODAL
-// ══════════════════════════════════════
-let authMode='signin';
-function openAuth(mode){
-  if(!sb){showSetupGuide();return;}
-  authMode=mode;
-  document.getElementById('auth-title').textContent=mode==='signin'?'Sign in':'Create account';
-  document.getElementById('auth-sub').textContent=mode==='signin'?'Access your saved journals and match history.':'Join AcademiQ — free for African researchers.';
-  document.getElementById('auth-submit').textContent=mode==='signin'?'Sign in':'Create account';
-  document.getElementById('auth-toggle-text').textContent=mode==='signin'?'Don\'t have an account?':'Already have an account?';
-  document.getElementById('auth-toggle-link').textContent=mode==='signin'?'Sign up':'Sign in';
-  document.getElementById('auth-name-field').style.display=mode==='signup'?'block':'none';
-  document.getElementById('auth-err').style.display='none';
-  document.getElementById('auth-ok').style.display='none';
-  document.getElementById('auth-ov').classList.add('open');
-}
-function closeAuth(){document.getElementById('auth-ov').classList.remove('open');}
-function toggleAuthMode(){openAuth(authMode==='signin'?'signup':'signin');}
-
-async function doAuth(){
-  const email=document.getElementById('auth-email').value.trim();
-  const pw=document.getElementById('auth-pw').value;
-  const name=document.getElementById('auth-name').value.trim();
-  const errEl=document.getElementById('auth-err');
-  const okEl=document.getElementById('auth-ok');
-  errEl.style.display='none';okEl.style.display='none';
-  if(!email||!pw){errEl.textContent='Please fill in email and password.';errEl.style.display='block';return;}
-  document.getElementById('auth-submit').disabled=true;
-  try{
-    if(authMode==='signup'){
-      const{error}=await sb.auth.signUp({email,password:pw,options:{data:{full_name:name||email.split('@')[0]}}});
-      if(error)throw error;
-      okEl.textContent='Check your email to confirm your account, then sign in.';okEl.style.display='block';
-    }else{
-      const{error}=await sb.auth.signInWithPassword({email,password:pw});
-      if(error)throw error;
-      closeAuth();
-    }
-  }catch(e){errEl.textContent=e.message;errEl.style.display='block';}
-  document.getElementById('auth-submit').disabled=false;
-}
-
-// ══════════════════════════════════════
-//  SAVE / UNSAVE JOURNALS
-// ══════════════════════════════════════
-let currentModalJournal=null;
-
-async function toggleSave(journalId,journalData){
-  if(!sb||!currentUser){openAuth('signin');return;}
-  if(savedIds.has(journalId)){
-    await sb.from('saved_journals').delete().eq('user_id',currentUser.id).eq('journal_id',journalId);
-    savedIds.delete(journalId);
-  }else{
-    await sb.from('saved_journals').insert({user_id:currentUser.id,journal_id:journalId,journal_data:journalData});
-    savedIds.add(journalId);
-  }
-  document.getElementById('saved-count').textContent=savedIds.size;
-  document.querySelectorAll(`.save-btn[data-id="${journalId}"]`).forEach(b=>{
-    b.textContent=savedIds.has(journalId)?'🔖':'🔲';
-    b.classList.toggle('saved',savedIds.has(journalId));
-  });
-  if(currentModalJournal&&currentModalJournal.id===journalId){
-    const btn=document.getElementById('m-save-btn');
-    btn.textContent=savedIds.has(journalId)?'🔖 Saved!':'🔖 Save journal';
-    btn.classList.toggle('saved',savedIds.has(journalId));
-  }
-}
-
-async function toggleSaveFromModal(){
-  if(!currentModalJournal)return;
-  await toggleSave(currentModalJournal.id,{
-    id:currentModalJournal.id,title:currentModalJournal.title,pub:currentModalJournal.pub,
-    country:currentModalJournal.country,region:currentModalJournal.region,apc:currentModalJournal.apc,
-    idx:currentModalJournal.idx,cr:currentModalJournal.cr,rw:currentModalJournal.rw,
-    li:currentModalJournal.li,fld:currentModalJournal.fld,scope:currentModalJournal.scope
-  });
-}
-
-async function refreshSavedTab(){
-  if(!sb||!currentUser){
-    document.getElementById('saved-grid').innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><div>Sign in to see your saved journals</div></div>';
-    return;
-  }
-  const{data}=await sb.from('saved_journals').select('*').eq('user_id',currentUser.id).order('saved_at',{ascending:false});
-  if(!data||!data.length){
-    document.getElementById('saved-grid').innerHTML='<div class="empty-state"><div class="empty-icon">🔖</div><div>No saved journals yet</div><div style="font-size:12px;margin-top:6px;color:#8A7E6E">Click the bookmark icon on any journal card</div></div>';
-    return;
-  }
-  document.getElementById('saved-grid').innerHTML=data.map(r=>{
-    const j=r.journal_data;
-    return`<div class="card">
-<button class="save-btn saved" data-id="${j.id}" onclick="toggleSave(${j.id},${JSON.stringify(j).replace(/"/g,'&quot;')})">🔖</button>
-<div class="cn">${FLAGS[j.country]||'🌍'} ${j.title}</div>
-<div class="cp">${j.pub}</div>
-<div class="tr">${apcH(j.apc)}${rgnH(j.region)}${idxH(j.idx||[])}</div>
-<div class="cr"><span>Credibility</span><div class="cb"><div class="cf" style="width:${j.cr}%;background:${cc(j.cr)}"></div></div><span style="color:${cc(j.cr)};font-weight:600">${j.cr}%</span></div>
-<div class="cm"><span>⏱ ${j.rw}w</span><span>📅 ${j.li}</span></div>
-</div>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════
-//  ALERTS WITH SUBSCRIPTIONS
-// ══════════════════════════════════════
-const ALS=[
-  {key:"cfp-omcl-oxidative",t:"cfp",ti:"Special Issue: Oxidative Stress in Neurological Disease",src:"Oxidative Medicine and Cellular Longevity",dl:"Feb 28, 2025",fld:"Biochemistry",ic:"📢"},
-  {key:"issue-njcp-24-1",t:"issue",ti:"New Issue — Vol 24 No 1 Published",src:"Nigerian Journal of Clinical Practice",dt:"Jan 2025",fld:"Medicine",ic:"📘"},
-  {key:"grant-tetfund-2025",t:"grant",ti:"TETFund Institutional Based Research Grant 2025",src:"Tertiary Education Trust Fund",dl:"Mar 15, 2025",fld:"All Fields",ic:"💰"},
-  {key:"cfp-bmc-vision",t:"cfp",ti:"Special Issue: Vision Science in Sub-Saharan Africa",src:"BMC Ophthalmology",dl:"Apr 30, 2025",fld:"Ophthalmology",ic:"📢"},
-  {key:"grant-wellcome-africa",t:"grant",ti:"Wellcome Trust Early Career Award — Africa",src:"Wellcome Trust",dl:"May 1, 2025",fld:"Biomedical Sciences",ic:"💰"},
-  {key:"issue-plosone-64",t:"issue",ti:"Vol 64 Published — Open Access",src:"PLOS ONE",dt:"Jan 2025",fld:"Multidisciplinary",ic:"📘"},
-  {key:"cfp-ntt-food",t:"cfp",ti:"Thematic Issue: Neurotoxicology of Food Additives",src:"Neurotoxicology and Teratology",dl:"Mar 31, 2025",fld:"Neurotoxicology",ic:"📢"},
-  {key:"grant-daad-2025",t:"grant",ti:"DAAD Research Grants for African Scientists 2025",src:"DAAD Germany",dl:"Jun 30, 2025",fld:"All Fields",ic:"💰"},
-];
-const AC={cfp:{bg:"#EAF5EE",c:"#0D5C30",l:"CFP"},issue:{bg:"#E8F4FE",c:"#0A4A7A",l:"New issue"},grant:{bg:"#FEF0D8",c:"#7A4A0A",l:"Grant"}};
-
-function renderAlertsWithSubs(){
-  const el=document.getElementById('alerts-content');
-  el.innerHTML=`
-<div style="font-family:'Lora',serif;font-size:20px;color:#0D2B1F;margin-bottom:4px">Alerts & Opportunities</div>
-<div style="font-size:12px;color:#8A7E6E;margin-bottom:16px">Calls for papers, new issues, and grants — subscribe to get notified.</div>
-${ALS.map(a=>`
-<div class="alert-card">
-  <div style="flex:1">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-      <span style="font-size:13px">${a.ic}</span>
-      <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;background:${AC[a.t].bg};color:${AC[a.t].c}">${AC[a.t].l}</span>
-      <span style="font-size:10px;color:#8A7E6E">${a.fld}</span>
-    </div>
-    <div style="font-family:'Lora',serif;font-size:13px;color:#0D2B1F;margin-bottom:2px">${a.ti}</div>
-    <div style="font-size:11px;color:#8A7E6E">${a.src} · ${a.dl?'Deadline: '+a.dl:a.dt}</div>
-  </div>
-  <button class="sub-btn${subbedKeys.has(a.key)?' subbed':''}" id="sub-${a.key}" onclick="toggleSub('${a.key}',${JSON.stringify(a).replace(/"/g,'&quot;')})">${subbedKeys.has(a.key)?'✓ Subscribed':'Subscribe'}</button>
-</div>`).join('')}`;
-}
-
-async function toggleSub(key,alertMeta){
-  if(!sb||!currentUser){openAuth('signin');return;}
-  const btn=document.getElementById('sub-'+key);
-  if(subbedKeys.has(key)){
-    await sb.from('alert_subscriptions').delete().eq('user_id',currentUser.id).eq('alert_key',key);
-    subbedKeys.delete(key);
-    btn.textContent='Subscribe';btn.classList.remove('subbed');
-  }else{
-    await sb.from('alert_subscriptions').insert({user_id:currentUser.id,alert_key:key,alert_meta:alertMeta});
-    subbedKeys.add(key);
-    btn.textContent='✓ Subscribed';btn.classList.add('subbed');
-  }
-}
-
-// ══════════════════════════════════════
-//  MATCH HISTORY
-// ══════════════════════════════════════
-async function saveMatchHistory(title,abstract,field,apcPref,regionPref,results){
-  if(!sb||!currentUser)return;
-  await sb.from('match_history').insert({
-    user_id:currentUser.id,title,abstract,field,
-    apc_pref:apcPref,region_pref:regionPref,
-    results:results.map(r=>({id:r.j.id,title:r.j.title,publisher:r.j.pub,matchScore:r.matchScore,reason:r.reason}))
-  });
-}
-
-async function loadHistory(){
-  const el=document.getElementById('history-list');
-  if(!sb||!currentUser){
-    el.innerHTML='<div class="empty-state"><div class="empty-icon">🔒</div><div>Sign in to see your match history</div></div>';
-    return;
-  }
-  const{data}=await sb.from('match_history').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(20);
-  if(!data||!data.length){
-    el.innerHTML='<div class="empty-state"><div class="empty-icon">🕰</div><div>No match history yet</div><div style="font-size:12px;margin-top:6px;color:#8A7E6E">Use the AI Match tab to find journals</div></div>';
-    return;
-  }
-  el.innerHTML=data.map(r=>`
-<div class="history-card">
-  <div class="history-meta">${new Date(r.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})} · Field: ${r.field||'All'} · APC: ${r.apc_pref} · Region: ${r.region_pref}</div>
-  <div class="history-title">${r.title||'(Untitled manuscript)'}</div>
-  <div class="history-abs">${r.abstract||''}</div>
-  <div class="history-matches">
-    ${(r.results||[]).map(m=>`<span class="tg tx">#${(r.results||[]).indexOf(m)+1} ${m.title.split(' ').slice(0,4).join(' ')}… (${m.matchScore}%)</span>`).join('')}
-  </div>
-</div>`).join('');
-}
-
-// ══════════════════════════════════════
-//  BITWISE 1M INDEX
-// ══════════════════════════════════════
-const N=1_000_000,PAGE=24,CAP=60000;
-const I32=new Uint32Array(N);
-for(let i=0;i<N;i++){
-  let s=(Math.imul(i,1664525)+1013904223)>>>0;
-  const fi=s%60;s=(Math.imul(s,1664525)+1013904223)>>>0;
-  const ri=s%10<2?0:s%10<5?1:2;s=(Math.imul(s,1664525)+1013904223)>>>0;
-  const ap=s%10,ab=ap<4?0:ap<6?1:ap<8?2:ap<9?3:4;
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const sc=s%10<3?1:0;
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const pm=s%10<2?1:0;
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const dj=s%10<5?1:0;
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const aj=(ri<2?s%10<5:s%10<1)?1:0;
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const ws=s%10<2?1:0;
-  const idxf=sc|(pm<<1)|(dj<<2)|(aj<<3)|(ws<<4);
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const cr=55+(s%46);
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const rv=s%4;
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const pf=s%30;
-  s=(Math.imul(s,1664525)+1013904223)>>>0;const ql=s%4;
-  I32[i]=fi|(ri<<6)|(ab<<8)|(idxf<<11)|((cr-55)<<16)|(rv<<22)|(pf<<24)|(ql<<29);
-}
-
-function genJ(id){
-  const p=I32[id];
-  const fi=p&0x3F,ri=(p>>6)&0x3,ab=(p>>8)&0x7,idxf=(p>>11)&0x1F;
-  const cr=((p>>16)&0x3F)+55,rv=(p>>22)&0x3,pf=(p>>>24)&0x1F,ql=(p>>>29)&0x3;
-  let s=(Math.imul(id,2654435761)^Math.imul(id>>>16,2246822519))>>>0;
-  const fld=FLDS[fi],q=QL[ql%QL.length],pfx=PFX[pf],region=RN[ri];
-  const pubs=ri===0?PL:ri===1?PA:PI;
-  const pub=pubs[s%pubs.length];
-  s=(Math.imul(s,1664525)+1013904223)>>>0;
-  const country=(ri===0?CL:ri===1?CA:CI)[s%(ri===0?CL:ri===1?CA:CI).length];
-  const apc=AM[Math.min(ab,4)];
-  const idx=IDXN.filter((_,k)=>idxf&(1<<k));
-  if(!idx.length)idx.push("CrossRef");
-  const rw=RM[rv]+(id%5);
-  const yr=2000+(id%25),mo=1+(id%12);
-  s=(Math.imul(s,1664525)+1013904223)>>>0;
-  const ar=25+(s%56);
-  const h=Math.imul(id,2654435761)>>>0;
-  const issn=`${1000+(h>>18)%9000}-${String((h&0x3FFF)%10000).padStart(4,'0')}`;
-  const geo=region==='local'?'Nigerian':region==='african'?'African':'global';
-  return{id,title:`${pfx} ${q}${fld}`,pub,country,region,fld,apc,idx,cr:Math.min(cr,100),rw,li:`${yr}-${String(mo).padStart(2,'0')}`,issn,scope:`Peer-reviewed ${q.toLowerCase()}${fld.toLowerCase()} research journal. Emphasises rigorous methodology, ${geo} relevance, and high-impact findings.`,ar};
-}
-
-// ══════════════════════════════════════
-//  FILTER + SORT
-// ══════════════════════════════════════
-let filtered=[],sorted=[],pg=0,timer=null;
-
-function go(){
-  document.getElementById('meta').innerHTML='<div class="scanning"><div class="spin"></div>Scanning all 1,000,000 journals…</div>';
-  clearTimeout(timer);
-  timer=setTimeout(()=>{
-    const q=(document.getElementById('q').value||'').toLowerCase().trim();
-    const rf=document.querySelector('[name="rgn"]:checked')?.value||'all';
-    const af=document.querySelector('[name="apc"]:checked')?.value||'all';
-    const ff=document.getElementById('f-sel').value;
-    const ixc=[...document.querySelectorAll('input[type=checkbox]:checked')].map(c=>c.value);
-    const none=!q&&rf==='all'&&af==='all'&&ff==='All Fields'&&!ixc.length;
-    if(none){filtered=Array.from({length:CAP},(_,i)=>i);showMeta(N,false);applySortRender();return;}
-    let mfi=null;
-    if(q){mfi=new Set();FLDS.forEach((f,i)=>{if(f.toLowerCase().includes(q))mfi.add(i);});}
-    const tfi=ff!=='All Fields'?FLDS.indexOf(ff):-1;
-    const im=ixc.reduce((m,nm)=>{const k=IDXN.indexOf(nm);return k>=0?m|(1<<k):m;},0);
-    const res=[];let total=0;
-    for(let i=0;i<N;i++){
-      const p=I32[i];
-      const fi=p&0x3F,ri=(p>>6)&0x3,ab=(p>>8)&0x7,idxf=(p>>11)&0x1F;
-      if(mfi&&!mfi.has(fi))continue;
-      if(tfi>=0&&fi!==tfi)continue;
-      if(rf==='local'&&ri!==0)continue;
-      if(rf==='african'&&ri!==1)continue;
-      if(rf==='intl'&&ri!==2)continue;
-      if(af==='free'&&ab!==0)continue;
-      if(af==='low'&&ab>1)continue;
-      if(im&&!(idxf&im))continue;
-      total++;if(res.length<CAP)res.push(i);
-    }
-    filtered=res;showMeta(total,total>CAP);applySortRender();
-  },4);
-}
-
-function debounce(){clearTimeout(timer);timer=setTimeout(go,260);}
-function resort(){applySortRender();}
-function showMeta(total,capped){
-  document.getElementById('meta').innerHTML=`<span class="chip">🗄️ ${total.toLocaleString()} journals</span>${capped?`<span>(top ${CAP.toLocaleString()} shown)</span>`:''}`;
-}
-function applySortRender(){
-  const sb2=document.getElementById('s-sel').value;
-  sorted=filtered.slice().sort((a,b)=>{
-    const pa=I32[a],pb=I32[b];
-    if(sb2==='cred')return((pb>>16)&0x3F)-((pa>>16)&0x3F);
-    if(sb2==='apc')return((pa>>8)&0x7)-((pb>>8)&0x7);
-    if(sb2==='rev')return((pa>>22)&0x3)-((pb>>22)&0x3);
-    if(sb2==='date')return(2000+(b%25))*12+(1+b%12)-((2000+(a%25))*12+(1+a%12));
-    return 0;
-  });
-  pg=0;render();
-}
-
-// ══════════════════════════════════════
-//  HTML HELPERS
-// ══════════════════════════════════════
-function cc(s){return s>=90?"#1A6B3C":s>=75?"#D4A017":"#C0392B";}
-function apcH(a){if(a===0)return'<span class="tg tf">● Free</span>';if(a<=500)return`<span class="tg tp">$${a} APC</span>`;return`<span class="tg tp">$${a.toLocaleString()} APC</span>`;}
-function rgnH(r){const m={local:"tl",african:"ta",intl:"ti"},l={local:"🇳🇬 Local",african:"🌍 African",intl:"🌐 Intl"};return`<span class="tg ${m[r]||'tx'}">${l[r]||r}</span>`;}
-function idxH(idx){return(idx||[]).filter(x=>["Scopus","PubMed","DOAJ","AJOL"].includes(x)).map(x=>`<span class="tg tx">${x}</span>`).join('');}
-
-function cardH(j){
-  const isSaved=savedIds.has(j.id);
-  const jData=JSON.stringify({id:j.id,title:j.title,pub:j.pub,country:j.country,region:j.region,apc:j.apc,idx:j.idx,cr:j.cr,rw:j.rw,li:j.li,fld:j.fld,scope:j.scope}).replace(/"/g,'&quot;');
-  return`<div class="card" onclick="openJ(${j.id})">
-<button class="save-btn${isSaved?' saved':''}" data-id="${j.id}" title="${isSaved?'Unsave':'Save'}" onclick="event.stopPropagation();toggleSave(${j.id},JSON.parse(this.dataset.jdata))" data-jdata="${jData}">${isSaved?'🔖':'🔲'}</button>
-<div class="cn">${FLAGS[j.country]||'🌍'} ${j.title}</div>
-<div class="cp">${j.pub}</div>
-<div class="tr">${apcH(j.apc)}${rgnH(j.region)}${idxH(j.idx)}</div>
-<div class="cr"><span>Credibility</span><div class="cb"><div class="cf" style="width:${j.cr}%;background:${cc(j.cr)}"></div></div><span style="color:${cc(j.cr)};font-weight:600">${j.cr}%</span></div>
-<div class="cm"><span>⏱ ${j.rw}w</span><span>✓ ${j.ar}%</span><span>📅 ${j.li}</span></div>
-</div>`;
-}
-
-function render(){
-  const slice=sorted.slice(0,(pg+1)*PAGE);
-  document.getElementById('grid').innerHTML=slice.length
-    ?slice.map(id=>cardH(genJ(id))).join('')
-    :'<div style="padding:50px;text-align:center;color:#8A7E6E;grid-column:1/-1">🔍 No journals match your filters</div>';
-  const rem=sorted.length-slice.length;
-  const lm=document.getElementById('lm');
-  lm.style.display=rem>0?'block':'none';
-  lm.textContent=`Load more — ${rem.toLocaleString()} remaining`;
-}
-
-// ══════════════════════════════════════
-//  JOURNAL MODAL
-// ══════════════════════════════════════
-const jCache={};
-function openJ(id){
-  if(!jCache[id])jCache[id]=genJ(id);
-  populateModal(jCache[id]);
-}
-function openReal(id){
-  const j=REAL.find(x=>x.id===id);if(!j)return;
-  populateModal({...j,id:j.id+'_real',cr:j.cr,rw:j.rw,li:j.li,pub:j.pub,idx:j.idx,ar:j.ar,scope:j.scope,issn:j.issn});
-}
-function populateModal(j){
-  currentModalJournal=j;
-  document.getElementById('m-tags').innerHTML=apcH(j.apc)+rgnH(j.region)+idxH(j.idx);
-  document.getElementById('m-title').textContent=j.title;
-  document.getElementById('m-pub').textContent=`${j.pub} · ${j.country}${j.issn?` · ISSN ${j.issn}`:''}`;
-  document.getElementById('m-scope').textContent=j.scope;
-  document.getElementById('m-ig').innerHTML=`
-<div class="ic"><div class="il">APC</div><div class="iv" style="color:${j.apc===0?'#1A6B3C':'#7A4A0A'}">${j.apc===0?'Free (open access)':'$'+j.apc.toLocaleString()+' USD'}</div></div>
-<div class="ic"><div class="il">Credibility</div><div class="iv" style="color:${cc(j.cr)}">${j.cr}/100</div></div>
-<div class="ic"><div class="il">Review Time</div><div class="iv">${j.rw} weeks</div></div>
-<div class="ic"><div class="il">Acceptance Rate</div><div class="iv">~${j.ar}%</div></div>
-<div class="ic"><div class="il">Last Issue</div><div class="iv">${j.li}</div></div>
-<div class="ic"><div class="il">Indexing</div><div class="iv" style="font-size:11px">${(j.idx||[]).join(', ')}</div></div>`;
-  document.getElementById('m-flds').innerHTML=`<span class="tg tx">${j.fld||j.field?.join(', ')||''}</span>`;
-  const isSaved=savedIds.has(j.id);
-  const btn=document.getElementById('m-save-btn');
-  btn.textContent=isSaved?'🔖 Saved!':'🔖 Save journal';
-  btn.classList.toggle('saved',isSaved);
-  document.getElementById('m-sub').href=j.sub||j.submissionUrl||'#';
-  document.getElementById('m-vis').href=j.web||j.website||'#';
-  document.getElementById('ov').classList.add('open');
-}
-function closeModal(){document.getElementById('ov').classList.remove('open');currentModalJournal=null;}
-
-// ══════════════════════════════════════
-//  TAB SWITCHER
-// ══════════════════════════════════════
-function showTab(t){
-  ['browse','match','alerts','saved','history'].forEach((id,i)=>{
-    document.getElementById('t-'+id).style.display=id===t?'flex':'none';
-    const nb=document.querySelectorAll('.nb')[i];
-    if(nb)nb.classList.toggle('on',id===t);
-  });
-  if(t==='saved')refreshSavedTab();
-  if(t==='history')loadHistory();
-  if(t==='alerts')renderAlertsWithSubs();
-}
-
-// ══════════════════════════════════════
-//  AI MATCH
-// ══════════════════════════════════════
-const REAL=[
-  {id:"r1",title:"African Journal of Biotechnology",pub:"Academic Journals (AJOL)",country:"Kenya",region:"african",field:["Biology","Biotechnology"],fld:"Biology",apc:0,idx:["AJOL","DOAJ","Scopus"],cr:88,li:"2024-12",rw:8,ar:42,sub:"https://academicjournals.org/journal/AJB",web:"https://academicjournals.org/journal/AJB",scope:"Biotechnology, microbiology, genetics, and applied biosciences with African agricultural focus.",issn:"1684-5315"},
-  {id:"r2",title:"Nigerian Journal of Clinical Practice",pub:"Nigerian Medical Association",country:"Nigeria",region:"local",field:["Medicine","Public Health"],fld:"Medicine",apc:0,idx:["PubMed","Scopus","AJOL"],cr:91,li:"2024-12",rw:12,ar:35,sub:"https://www.njcponline.com/authors.asp",web:"https://www.njcponline.com",scope:"Clinical research and health sciences in Nigeria and sub-Saharan Africa.",issn:"1119-3077"},
-  {id:"r3",title:"Toxicology Reports",pub:"Elsevier",country:"Netherlands",region:"intl",field:["Toxicology","Pharmacology","Biochemistry"],fld:"Toxicology",apc:0,idx:["Scopus","PubMed","DOAJ"],cr:93,li:"2025-01",rw:7,ar:48,sub:"https://www.sciencedirect.com/journal/toxicology-reports",web:"https://www.journals.elsevier.com/toxicology-reports",scope:"Open-access research on toxic effects of chemical, biological, and physical agents on living systems.",issn:"2214-7500"},
-  {id:"r4",title:"BMC Ophthalmology",pub:"BioMed Central (Springer Nature)",country:"UK",region:"intl",field:["Ophthalmology","Vision Science"],fld:"Ophthalmology",apc:2290,idx:["PubMed","Scopus","DOAJ","WoS"],cr:96,li:"2025-01",rw:8,ar:62,sub:"https://bmcophthalmol.biomedcentral.com/submission-guidelines",web:"https://bmcophthalmol.biomedcentral.com",scope:"Open access ophthalmology: clinical trials, epidemiology, visual science, novel treatments.",issn:"1471-2415"},
-  {id:"r5",title:"PLOS ONE",pub:"Public Library of Science",country:"USA",region:"intl",field:["Medicine","Biology","Engineering"],fld:"Medicine",apc:1350,idx:["PubMed","Scopus","DOAJ","WoS"],cr:97,li:"2025-01",rw:6,ar:70,sub:"https://journals.plos.org/plosone/s/submit-now",web:"https://plos.org/plosone",scope:"Multidisciplinary peer-reviewed research. APC waivers available for low-income countries.",issn:"1932-6203"},
-  {id:"r6",title:"Neurotoxicology and Teratology",pub:"Elsevier",country:"USA",region:"intl",field:["Neurotoxicology","Toxicology","Pharmacology"],fld:"Neurotoxicology",apc:3600,idx:["PubMed","Scopus","WoS"],cr:94,li:"2024-12",rw:10,ar:35,sub:"https://www.sciencedirect.com/journal/neurotoxicology-and-teratology",web:"https://www.journals.elsevier.com/neurotoxicology-and-teratology",scope:"Developmental neurotoxicology: prenatal exposures, behavioral teratology, mechanisms of chemical neurotoxicity.",issn:"0892-0362"},
-  {id:"r7",title:"Investigative Ophthalmology & Visual Science",pub:"ARVO",country:"USA",region:"intl",field:["Vision Science","Ophthalmology","Neuroscience"],fld:"Vision Science",apc:0,idx:["PubMed","Scopus","WoS"],cr:96,li:"2025-01",rw:7,ar:32,sub:"https://iovs.arvojournals.org/submission",web:"https://iovs.arvojournals.org",scope:"Premier vision research: retina, cornea, glaucoma, neurophysiology, and clinical ophthalmological science.",issn:"1552-5783"},
-  {id:"r8",title:"African Health Sciences",pub:"Makerere University",country:"Uganda",region:"african",field:["Medicine","Public Health","Nursing"],fld:"Public Health",apc:0,idx:["PubMed","Scopus","DOAJ","AJOL"],cr:90,li:"2024-12",rw:11,ar:38,sub:"https://www.ajol.info/index.php/ahs",web:"https://www.ajol.info/index.php/ahs",scope:"Broad biomedical journal: clinical medicine, infectious diseases, and health systems across Africa.",issn:"1680-6905"},
-  {id:"r9",title:"Oxidative Medicine and Cellular Longevity",pub:"Hindawi / Wiley",country:"UK",region:"intl",field:["Biochemistry","Cell Biology"],fld:"Biochemistry",apc:0,idx:["PubMed","Scopus","DOAJ"],cr:87,li:"2024-10",rw:8,ar:45,sub:"https://www.hindawi.com/journals/omcl/",web:"https://www.hindawi.com/journals/omcl/",scope:"Oxidative stress, antioxidant mechanisms, free radical biology, and role in disease pathogenesis.",issn:"1942-0900"},
-  {id:"r10",title:"West African Journal of Medicine",pub:"West African College of Physicians",country:"Nigeria",region:"local",field:["Medicine","Surgery","Public Health"],fld:"Medicine",apc:0,idx:["PubMed","AJOL","Scopus"],cr:89,li:"2024-12",rw:13,ar:37,sub:"https://www.ajol.info/index.php/wajm",web:"https://www.ajol.info/index.php/wajm",scope:"Regional clinical journal: surgery, internal medicine, paediatrics, tropical disease.",issn:"0189-160X"},
-];
-const ST="Effects of Vitamins C and D on MSG-Induced Oxidative Stress and Visual Performance in Male Wistar Rats";
-const SA="This study investigated the neuroprotective and oculoprotective effects of vitamins C and D supplementation against MSG-induced developmental neurotoxicity and ocular toxicity in F1 male Wistar rat offspring. Oxidative stress markers (MDA, SOD, CAT, GSH) were assessed in brain and retinal tissues. Visual performance was evaluated using cliff avoidance and light/dark adaptation assays. Vitamin supplementation significantly attenuated oxidative damage and improved visual outcomes via the Nrf2/Keap1/ARE pathway.";
-function loadSample(){document.getElementById('mt').value=ST;document.getElementById('ma').value=SA;}
-function clearMatch(){document.getElementById('mt').value='';document.getElementById('ma').value='';document.getElementById('mres').innerHTML='';}
-
-async function doMatch(){
-  const t=document.getElementById('mt').value;
-  const a=document.getElementById('ma').value;
-  const errEl=document.getElementById('merr');
-  if(!t.trim()&&!a.trim()){errEl.textContent="Please enter a title or abstract.";errEl.style.display='block';return;}
-  errEl.style.display='none';
-  document.getElementById('mbtn').disabled=true;
-  document.getElementById('mld').style.display='flex';
-  document.getElementById('mres').innerHTML='';
-  const ff=document.getElementById('mf').value;
-  const ap=document.getElementById('map').value;
-  const rg=document.getElementById('mr').value;
-  const jl=REAL.map(j=>`ID:${j.id}|"${j.title}"|${j.pub}|Fields:${j.field.join(",")}|APC:${j.apc===0?"Free":"$"+j.apc}|Region:${j.region}|Idx:${j.idx.join(",")}|Cred:${j.cr}`).join("\n");
-  const pr=`You are an academic journal recommender for African researchers. Recommend TOP 5 journals.\n\nTITLE: ${t||"(not provided)"}\nABSTRACT: ${a}\nPREFERENCES: APC=${ap}|Region=${rg}|Field=${ff}\n\nJOURNALS:\n${jl}\n\nReturn ONLY valid JSON array of 5, no markdown:\n[{"id":"<id>","matchScore":<0-100>,"reason":"<2 sentences>","highlight":"<one strength for African researchers>"}]`;
-  try{
-    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:pr}]})});
-    const d=await resp.json();
-    const txt=d.content?.find(b=>b.type==="text")?.text||"";
-    const parsed=JSON.parse(txt.replace(/```json|```/g,"").trim());
-    const results=parsed.map(rx=>({...rx,j:REAL.find(x=>x.id===rx.id)})).filter(rx=>rx.j);
-    document.getElementById('mres').innerHTML=
-      `<div class="dv"></div><div style="font-size:12px;color:#8A7E6E;margin-bottom:10px">Top ${results.length} matches — ranked by Claude${currentUser?' · saving to history…':''}</div>`
-      +results.map((rx,i)=>`
-<div class="rc" onclick="openReal('${rx.j.id}')">
-  <div class="rk${i<3?" top":""}">${i+1}</div>
-  <div class="rb">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:2px">
-      <div class="rtt">${rx.j.title}</div>
-      <span class="rsp${rx.matchScore<75?" md":""}">${rx.matchScore}%</span>
-    </div>
-    <div class="rpb">${rx.j.pub}</div>
-    <div class="rr">${rx.reason}</div>
-    <div class="tr">${apcH(rx.j.apc)}${rgnH(rx.j.region)}${idxH(rx.j.idx)}<span class="tg tf">★ ${rx.highlight}</span></div>
-  </div>
-</div>`).join('');
-    if(currentUser)await saveMatchHistory(t,a,ff,ap,rg,results);
-  }catch(err){
-    errEl.textContent="AI matching failed — please try again.";errEl.style.display='block';
-  }
-  document.getElementById('mbtn').disabled=false;
-  document.getElementById('mld').style.display='none';
-}
-
-// ══════════════════════════════════════
-//  SETUP GUIDE
-// ══════════════════════════════════════
-function showSetupGuide(){document.getElementById('setup-ov').classList.add('open');}
-function closeSetup(){document.getElementById('setup-ov').classList.remove('open');}
-function copySQL(){navigator.clipboard.writeText(SETUP_SQL).then(()=>alert('SQL copied to clipboard!'));}
-
-// ══════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════
-const fopts=['All Fields',...FLDS].map(f=>`<option value="${f}">${f}</option>`).join('');
-document.getElementById('f-sel').innerHTML=fopts;
-document.getElementById('mf').innerHTML=fopts;
-renderAlertsWithSubs();
-
-// Auto-connect if credentials saved
-const savedUrl=localStorage.getItem('aq_sb_url');
-const savedKey=localStorage.getItem('aq_sb_key');
-if(savedUrl&&savedKey){
-  document.getElementById('cfg-url').value=savedUrl;
-  document.getElementById('cfg-key').value=savedKey;
-  try{sb=supabase.createClient(savedUrl,savedKey);afterConnect();}catch(e){}
-}
-go();
-</script>
+        // Init language on load
+        window.onload = () => {
+            const saved = localStorage.getItem('userLang') || 'en';
+            translateUI(saved);
+        };
+    </script>
 </body>
 </html>
